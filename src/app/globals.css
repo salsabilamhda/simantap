@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+:root {
+  /* Color Palette based on SIMANTAP-DESIGN.md */
+  --primary-teal: #2BA8A2;
+  --primary-teal-light: #3CC4BD;
+  --primary-teal-dark: #1E8C86;
+  --primary-bg: #E8F6F5;
+  --accent-gold: #FFD23F;
+  --accent-gold-light: #FFE47A;
+  --accent-gold-dark: #E6B800;
+  --coral: #EF6C4A;
+  --coral-light: #FF8A6A;
+  --coral-dark: #D45233;
+  --cream: #FFF8E7;
+  --sky-blue: #5DADE2;
+  --surface-base: #EFF8F7;
+  --surface-card: #FFFFFF;
+  --success: #27AE60;
+  --error: #E74C3C;
+
+  /* Elevation & Glow Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+  --shadow-card: 0 4px 20px rgba(43, 168, 162, 0.10);
+  --shadow-coral-glow: 0 4px 20px rgba(239, 108, 74, 0.35);
+  --shadow-teal-glow: 0 4px 20px rgba(43, 168, 162, 0.30);
+  --shadow-accent-glow: 0 4px 20px rgba(255, 210, 63, 0.40);
+  --shadow-sky-glow: 0 4px 16px rgba(93, 173, 226, 0.30);
+  --shadow-focus: 0 0 0 4px rgba(43, 168, 162, 0.15);
+}
+
+body {
+  background-color: var(--surface-base);
+  color: #2C3E50;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom Design System Utility Classes */
+.bg-primary-teal { background-color: var(--primary-teal); }
+.bg-primary-teal-light { background-color: var(--primary-teal-light); }
+.bg-primary-teal-dark { background-color: var(--primary-teal-dark); }
+.bg-primary-bg { background-color: var(--primary-bg); }
+.bg-accent-gold { background-color: var(--accent-gold); }
+.bg-accent-gold-light { background-color: var(--accent-gold-light); }
+.bg-coral { background-color: var(--coral); }
+.bg-coral-light { background-color: var(--coral-light); }
+.bg-cream { background-color: var(--cream); }
+.bg-sky-blue { background-color: var(--sky-blue); }
+.bg-surface-base { background-color: var(--surface-base); }
+.bg-surface-card { background-color: var(--surface-card); }
+
+.text-primary-teal { color: var(--primary-teal); }
+.text-primary-teal-dark { color: var(--primary-teal-dark); }
+.text-accent-gold { color: var(--accent-gold); }
+.text-accent-gold-dark { color: var(--accent-gold-dark); }
+.text-coral { color: var(--coral); }
+.text-coral-dark { color: var(--coral-dark); }
+.text-sky-blue { color: var(--sky-blue); }
+
+.border-primary-teal { border-color: var(--primary-teal); }
+.border-accent-gold { border-color: var(--accent-gold); }
+.border-coral { border-color: var(--coral); }
+.border-sky-blue { border-color: var(--sky-blue); }
+
+/* Glow Shadows */
+.shadow-card-custom {
+  box-shadow: 0 4px 20px rgba(43, 168, 162, 0.10);
+}
+
+.shadow-coral-glow {
+  box-shadow: 0 4px 20px rgba(239, 108, 74, 0.35);
+}
+
+.shadow-teal-glow {
+  box-shadow: 0 4px 20px rgba(43, 168, 162, 0.30);
+}
+
+.shadow-accent-glow {
+  box-shadow: 0 4px 20px rgba(255, 210, 63, 0.40);
+}
+
+.shadow-sky-glow {
+  box-shadow: 0 4px 16px rgba(93, 173, 226, 0.30);
+}
+
+/* Custom Buttons based on SIMANTAP-DESIGN.md */
+.btn-gold-primary {
+  background: linear-gradient(135deg, #FFD23F, #E6B800);
+  color: #2C3E50;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(255, 210, 63, 0.40);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-gold-primary:hover {
+  filter: brightness(1.05);
+}
+.btn-gold-primary:active {
+  transform: scale(0.95);
+  opacity: 0.95;
+}
+
+.btn-teal-outline {
+  background: #FFFFFF;
+  color: #2BA8A2;
+  border: 2px solid #2BA8A2;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(43, 168, 162, 0.20);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-teal-outline:hover {
+  background: #E8F6F5;
+}
+.btn-teal-outline:active {
+  transform: scale(0.96);
+}
+
+.btn-coral {
+  background: #EF6C4A;
+  color: #FFFFFF;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(239, 108, 74, 0.35);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-coral:hover {
+  background: #D45233;
+}
+.btn-coral:active {
+  transform: scale(0.95);
+}
+
+.btn-sky {
+  background: #5DADE2;
+  color: #FFFFFF;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(93, 173, 226, 0.30);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-sky:hover {
+  filter: brightness(1.05);
+}
+.btn-sky:active {
+  transform: scale(0.95);
+}
+
+/* Cream Inputs based on SIMANTAP-DESIGN.md */
+.input-cream {
+  background-color: #FFF8E7;
+  border: 2px solid #E2D7C3;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  color: #2C3E50;
+}
+.input-cream:focus {
+  outline: none;
+  border-color: #5DADE2;
+  box-shadow: 0 0 0 4px rgba(93, 173, 226, 0.25);
+}
+
+/* Section Titles with playful dashed border */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1E8C86;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  border-bottom: 2px dashed rgba(43, 168, 162, 0.35);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Dynamic Cards with Left Accent */
+.card-simantap {
+  background-color: #FFFFFF;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(43, 168, 162, 0.12);
+  border-left-width: 6px;
+  box-shadow: 0 4px 20px rgba(43, 168, 162, 0.10);
+  transition: all 0.25s ease;
+}
+.card-simantap:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(43, 168, 162, 0.16);
+}
+
+/* Ribbon Subtitle Banner Effect */
+.ribbon-banner {
+  display: inline-flex;
+  align-items: center;
+  background-color: #FFF8E7;
+  border: 2px solid #1E8C86;
+  border-radius: 6px;
+  color: #1E8C86;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.85rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
