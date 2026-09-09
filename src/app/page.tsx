@@ -1,26 +1,22 @@
-import React from "react";
-import Link from "next/link";
-import {
-  Users,
-  ShieldCheck,
-  Building2,
-  FileSpreadsheet,
-  Upload,
-  Download,
-  PlusCircle,
-  Briefcase,
-  Layers,
-  Sparkles,
-  UserCheck,
-} from "lucide-react";
 import StatCard from "@/components/stat-card";
-import UnitDistribution from "@/components/unit-distribution";
 import TenagaKerjaTable from "@/components/tenaga-kerja-table";
+import UnitDistribution from "@/components/unit-distribution";
 import { STATS_SUMMARY } from "@/lib/sample-data";
+import {
+    Briefcase,
+    Building2,
+    FileSpreadsheet,
+    PlusCircle,
+    ShieldCheck,
+    Sparkles,
+    UserCheck,
+    Users
+} from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
+    <div className="w-full max-w-full space-y-8 overflow-hidden min-w-0">
       
       {/* Hero Welcome Banner */}
       <div className="relative overflow-hidden bg-gradient-to-r from-white via-[#E8F6F5] to-white rounded-3xl p-6 sm:p-8 border border-[#2BA8A2]/20 shadow-card-custom">
@@ -105,15 +101,15 @@ export default function DashboardPage() {
       </div>
 
       {/* Middle Section: Distribution & Summary Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-w-0">
         
         {/* Unit Breakdown (2 Columns) */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0 overflow-hidden">
           <UnitDistribution />
         </div>
 
         {/* Mitra & Demografi Card (1 Column) */}
-        <div className="bg-white rounded-3xl p-6 border border-[#2BA8A2]/15 shadow-card-custom flex flex-col justify-between">
+        <div className="bg-white rounded-3xl p-6 border border-[#2BA8A2]/15 shadow-card-custom flex flex-col justify-between min-w-0 overflow-hidden">
           <div>
             <div className="flex items-center gap-2.5 pb-4 mb-4 border-b-2 border-dashed border-[#2BA8A2]/20">
               <div className="w-9 h-9 rounded-xl bg-[#FFF8E7] flex items-center justify-center text-[#C9A227]">
@@ -126,14 +122,14 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-2xl bg-[#EFF8F7] border border-[#2BA8A2]/10">
+              <div className="p-3.5 rounded-2xl bg-[#EFF8F7] border border-[#2BA8A2]/10 min-w-0 overflow-hidden">
                 <span className="text-gray-400 font-bold uppercase text-[10px] tracking-wider block">
                   Perusahaan Penyedia Jasa
                 </span>
-                <span className="font-extrabold text-sm text-gray-800 mt-0.5 block">
+                <span className="font-extrabold text-sm text-gray-800 mt-0.5 block break-words leading-relaxed">
                   {STATS_SUMMARY.perusahaanUtama}
                 </span>
-                <span className="text-[11px] text-[#2BA8A2] font-semibold mt-1 inline-block">
+                <span className="text-[11px] text-[#2BA8A2] font-semibold mt-1 inline-block break-words leading-relaxed max-w-full">
                   No. Kontrak: 1211,Pj/DAN,00,07/F04000000/2024
                 </span>
               </div>
