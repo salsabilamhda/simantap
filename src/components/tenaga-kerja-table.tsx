@@ -1,17 +1,21 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { TenagaKerja } from "@/types/tenaga-kerja";
 import { INITIAL_TENAGA_KERJA, PLAYER_AVATAR_COLORS } from "@/lib/sample-data";
-import { Search, Filter, Eye, Award, Phone, Building } from "lucide-react";
+import { TenagaKerja } from "@/types/tenaga-kerja";
+import { Award, Building, Eye, Filter, PencilLine, Phone, Save, Search, X } from "lucide-react";
+import { useMemo, useState } from "react";
 
 export default function TenagaKerjaTable() {
+  const [tableData, setTableData] = useState<TenagaKerja[]>(INITIAL_TENAGA_KERJA);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUnit, setSelectedUnit] = useState("ALL");
   const [selectedStatus, setSelectedStatus] = useState("ALL");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<TenagaKerja | null>(null);
+  const [selectedDetail, setSelectedDetail] = useState<TenagaKerja | null>(null);
 
   const filteredData = useMemo(() => {
-    return INITIAL_TENAGA_KERJA.filter((item) => {
+    return tableData.filter((item) => {
       const matchSearch =
         item.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.nik.includes(searchQuery) ||
@@ -26,12 +30,43 @@ export default function TenagaKerjaTable() {
 
       return matchSearch && matchUnit && matchStatus;
     });
-  }, [searchQuery, selectedUnit, selectedStatus]);
+  }, [searchQuery, selectedUnit, selectedStatus, tableData]);
+
+  const handleEdit = (item: TenagaKerja) => {
+    setEditingId(item.id);
+    setDraft({ ...item });
+  };
+
+  const handleDraftChange = <K extends keyof TenagaKerja>(field: K, value: TenagaKerja[K]) => {
+    setDraft((prev) => (prev ? { ...prev, [field]: value } : prev));
+  };
+
+  const handleSave = () => {
+    if (!draft || !editingId) return;
+
+    setTableData((prev) =>
+      prev.map((item) =>
+        item.id === editingId
+          ? {
+              ...item,
+              ...draft,
+              updatedAt: new Date().toISOString(),
+            }
+          : item
+      )
+    );
+
+    setEditingId(null);
+    setDraft(null);
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setDraft(null);
+  };
 
   return (
     <div className="bg-white rounded-3xl p-6 border border-[#2BA8A2]/15 shadow-card-custom">
-      
-      {/* Header and Filter Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b-2 border-dashed border-[#2BA8A2]/20">
         <div>
           <h3 className="text-lg font-black text-[#1E8C86] flex items-center gap-2">
@@ -45,9 +80,7 @@ export default function TenagaKerjaTable() {
           </p>
         </div>
 
-        {/* Filter Bar */}
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Search Input using cream surface & sky glow */}
           <div className="relative min-w-[240px]">
             <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -59,7 +92,6 @@ export default function TenagaKerjaTable() {
             />
           </div>
 
-          {/* Unit Filter */}
           <div className="relative">
             <select
               value={selectedUnit}
@@ -76,7 +108,6 @@ export default function TenagaKerjaTable() {
             <Filter className="w-3.5 h-3.5 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
-          {/* Status Filter */}
           <div className="relative">
             <select
               value={selectedStatus}
@@ -92,7 +123,6 @@ export default function TenagaKerjaTable() {
         </div>
       </div>
 
-      {/* Table Content */}
       <div className="overflow-x-auto mt-4">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -114,70 +144,137 @@ export default function TenagaKerjaTable() {
                 .slice(0, 2)
                 .map((n) => n[0])
                 .join("");
+              const isEditing = editingId === item.id;
 
               return (
                 <tr key={item.id} className="hover:bg-[#EFF8F7]/60 transition-colors group">
-                  
-                  {/* Nama & Avatar with colored pool */}
                   <td className="py-3.5 px-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-extrabold text-xs shadow-xs"
-                        style={{ backgroundColor: avatarColor }}
-                      >
-                        {initials}
+                    {isEditing && draft ? (
+                      <div className="space-y-2 min-w-[180px]">
+                        <input
+                          value={draft.nama}
+                          onChange={(e) => handleDraftChange("nama", e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-bold text-gray-800"
+                        />
+                        <input
+                          value={draft.noTelepon}
+                          onChange={(e) => handleDraftChange("noTelepon", e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1 text-[11px] text-gray-500"
+                        />
                       </div>
-                      <div>
-                        <div className="font-extrabold text-gray-800 text-sm">
-                          {item.nama}
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-extrabold text-xs shadow-xs"
+                          style={{ backgroundColor: avatarColor }}
+                        >
+                          {initials}
                         </div>
-                        <div className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
-                          <Phone className="w-3 h-3 text-gray-400" />
-                          <span>{item.noTelepon}</span>
+                        <div>
+                          <div className="font-extrabold text-gray-800 text-sm">{item.nama}</div>
+                          <div className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
+                            <Phone className="w-3 h-3 text-gray-400" />
+                            <span>{item.noTelepon}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </td>
 
-                  {/* NIK & Usia */}
                   <td className="py-3.5 px-4">
-                    <div className="font-mono font-bold text-gray-700">{item.nik}</div>
-                    <div className="text-[11px] text-gray-400">{item.usia || "-"}</div>
+                    {isEditing && draft ? (
+                      <div className="space-y-2 min-w-[130px]">
+                        <input
+                          value={draft.nik}
+                          onChange={(e) => handleDraftChange("nik", e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1 font-mono text-gray-700 font-bold"
+                        />
+                        <input
+                          value={draft.usia || ""}
+                          onChange={(e) => handleDraftChange("usia", e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1 text-[11px] text-gray-500"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-mono font-bold text-gray-700">{item.nik}</div>
+                        <div className="text-[11px] text-gray-400">{item.usia || "-"}</div>
+                      </>
+                    )}
                   </td>
 
-                  {/* Unit Layanan */}
                   <td className="py-3.5 px-4">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#E8F6F5] text-[#1E8C86]">
-                      <Building className="w-3 h-3 text-[#2BA8A2]" />
-                      {item.unitLayanan}
-                    </span>
-                  </td>
-
-                  {/* Jabatan */}
-                  <td className="py-3.5 px-4">
-                    <div className="font-bold text-gray-800">{item.jabatanTerakhir}</div>
-                    <div className="text-[11px] text-gray-400">{item.namaPerusahaan}</div>
-                  </td>
-
-                  {/* Status & Skema */}
-                  <td className="py-3.5 px-4">
-                    <div className="flex flex-col gap-1 items-start">
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                          item.statusTenagaKerja === "PKWTT"
-                            ? "bg-[#27AE60]/15 text-[#27AE60]"
-                            : "bg-[#EF6C4A]/15 text-[#EF6C4A]"
-                        }`}
-                      >
-                        {item.statusTenagaKerja}
+                    {isEditing && draft ? (
+                      <input
+                        value={draft.unitLayanan}
+                        onChange={(e) => handleDraftChange("unitLayanan", e.target.value)}
+                        className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-[11px] font-bold text-[#1E8C86] bg-[#E8F6F5]"
+                      />
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#E8F6F5] text-[#1E8C86]">
+                        <Building className="w-3 h-3 text-[#2BA8A2]" />
+                        {item.unitLayanan}
                       </span>
-                      <span className="text-[10px] text-gray-400 uppercase font-semibold">
-                        {item.skemaTenagaKerja}
-                      </span>
-                    </div>
+                    )}
                   </td>
 
-                  {/* Sertifikasi */}
+                  <td className="py-3.5 px-4">
+                    {isEditing && draft ? (
+                      <div className="space-y-2 min-w-[150px]">
+                        <input
+                          value={draft.jabatanTerakhir}
+                          onChange={(e) => handleDraftChange("jabatanTerakhir", e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1.5 font-bold text-gray-800"
+                        />
+                        <input
+                          value={draft.namaPerusahaan}
+                          onChange={(e) => handleDraftChange("namaPerusahaan", e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1 text-[11px] text-gray-500"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div className="font-bold text-gray-800">{item.jabatanTerakhir}</div>
+                        <div className="text-[11px] text-gray-400">{item.namaPerusahaan}</div>
+                      </>
+                    )}
+                  </td>
+
+                  <td className="py-3.5 px-4">
+                    {isEditing && draft ? (
+                      <div className="space-y-2 min-w-[120px]">
+                        <select
+                          value={draft.statusTenagaKerja}
+                          onChange={(e) => handleDraftChange("statusTenagaKerja", e.target.value as TenagaKerja["statusTenagaKerja"])}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1 text-[10px] font-black"
+                        >
+                          <option value="PKWTT">PKWTT</option>
+                          <option value="PKWT">PKWT</option>
+                        </select>
+                        <input
+                          value={draft.skemaTenagaKerja}
+                          onChange={(e) => handleDraftChange("skemaTenagaKerja", e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1 text-[10px] text-gray-500 uppercase"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1 items-start">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                            item.statusTenagaKerja === "PKWTT"
+                              ? "bg-[#27AE60]/15 text-[#27AE60]"
+                              : "bg-[#EF6C4A]/15 text-[#EF6C4A]"
+                          }`}
+                        >
+                          {item.statusTenagaKerja}
+                        </span>
+                        <span className="text-[10px] text-gray-400 uppercase font-semibold">
+                          {item.skemaTenagaKerja}
+                        </span>
+                      </div>
+                    )}
+                  </td>
+
                   <td className="py-3.5 px-4">
                     {item.sertifikasiList && item.sertifikasiList.length > 0 ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-[#FFF8E7] text-[#C9A227] border border-[#FFD23F] shadow-xs">
@@ -189,17 +286,48 @@ export default function TenagaKerjaTable() {
                     )}
                   </td>
 
-                  {/* Aksi */}
                   <td className="py-3.5 px-4 text-center">
-                    <button
-                      className="btn-teal-outline px-3 py-1.5 text-[11px] inline-flex items-center gap-1 cursor-pointer"
-                      title="Lihat Detail Profil"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      Detail
-                    </button>
+                    {isEditing ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleSave}
+                          className="inline-flex items-center gap-1 bg-[#1E8C86] text-white px-2 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#17756f]"
+                        >
+                          <Save className="w-3 h-3" />
+                          Simpan
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCancel}
+                          className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1.5 rounded-lg text-[10px] font-bold hover:bg-gray-200"
+                        >
+                          <X className="w-3 h-3" />
+                          Batal
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(item)}
+                          className="btn-teal-outline px-2.5 py-1.5 text-[10px] inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <PencilLine className="w-3 h-3" />
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDetail(item)}
+                          className="btn-teal-outline px-2.5 py-1.5 text-[10px] inline-flex items-center gap-1 cursor-pointer"
+                          title="Lihat Detail Profil"
+                        >
+                          <Eye className="w-3 h-3" />
+                          Detail
+                        </button>
+                      </div>
+                    )}
                   </td>
-
                 </tr>
               );
             })}
@@ -213,6 +341,75 @@ export default function TenagaKerjaTable() {
         )}
       </div>
 
+      {selectedDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+          <div className="w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl border border-[#2BA8A2]/15">
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-gray-200">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-gray-400 font-bold">Profil Tenaga Kerja</p>
+                <h4 className="text-2xl font-black text-[#1E8C86] mt-1">{selectedDetail.nama}</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDetail(null)}
+                className="w-9 h-9 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
+                aria-label="Tutup detail"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5 text-sm">
+              <div className="rounded-2xl bg-[#F8FBFB] p-4 border border-[#2BA8A2]/10">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-gray-400 font-bold mb-2">Data Pribadi</p>
+                <div className="space-y-2 text-gray-700">
+                  <div><span className="font-bold text-gray-500">NIK:</span> {selectedDetail.nik}</div>
+                  <div><span className="font-bold text-gray-500">Tempat/Tanggal Lahir:</span> {selectedDetail.tempatLahir || "-"}, {selectedDetail.tanggalLahir || "-"}</div>
+                  <div><span className="font-bold text-gray-500">Usia:</span> {selectedDetail.usia || "-"}</div>
+                  <div><span className="font-bold text-gray-500">Jenis Kelamin:</span> {selectedDetail.jenisKelamin}</div>
+                  <div><span className="font-bold text-gray-500">Pendidikan:</span> {selectedDetail.pendidikanTerakhir} - {selectedDetail.jurusan || "-"}</div>
+                  <div><span className="font-bold text-gray-500">Telepon:</span> {selectedDetail.noTelepon}</div>
+                  <div><span className="font-bold text-gray-500">Email:</span> {selectedDetail.email || "-"}</div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-[#F8FBFB] p-4 border border-[#2BA8A2]/10">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-gray-400 font-bold mb-2">Penempatan</p>
+                <div className="space-y-2 text-gray-700">
+                  <div><span className="font-bold text-gray-500">Unit:</span> {selectedDetail.unitLayanan}</div>
+                  <div><span className="font-bold text-gray-500">Jabatan:</span> {selectedDetail.jabatanTerakhir}</div>
+                  <div><span className="font-bold text-gray-500">Perusahaan:</span> {selectedDetail.namaPerusahaan}</div>
+                  <div><span className="font-bold text-gray-500">Status:</span> {selectedDetail.statusTenagaKerja}</div>
+                  <div><span className="font-bold text-gray-500">Skema:</span> {selectedDetail.skemaTenagaKerja}</div>
+                  <div><span className="font-bold text-gray-500">Perjanjian:</span> {selectedDetail.nomorPerjanjian || "-"}</div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-[#F8FBFB] p-4 border border-[#2BA8A2]/10 md:col-span-2">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-gray-400 font-bold mb-2">Alamat & Jaminan</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-gray-700">
+                  <div><span className="font-bold text-gray-500">Alamat:</span> {selectedDetail.alamatDomisili || "-"}</div>
+                  <div><span className="font-bold text-gray-500">Kota/Kab:</span> {selectedDetail.kotaKabupaten || "-"}</div>
+                  <div><span className="font-bold text-gray-500">Provinsi:</span> {selectedDetail.provinsi || "-"}</div>
+                  <div><span className="font-bold text-gray-500">BPJS Kesehatan:</span> {selectedDetail.nomorBpjsKesehatan || "-"}</div>
+                  <div><span className="font-bold text-gray-500">BPJS Ketenagakerjaan:</span> {selectedDetail.nomorBpjsKetenagakerjaan || "-"}</div>
+                  <div><span className="font-bold text-gray-500">DPLK:</span> {selectedDetail.nomorDplk || "-"} / {selectedDetail.bankDplk || "-"}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-6">
+              <button
+                type="button"
+                onClick={() => setSelectedDetail(null)}
+                className="btn-teal-outline px-4 py-2.5 text-xs font-bold"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
