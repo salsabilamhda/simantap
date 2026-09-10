@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, UserPlus, Mail, ShieldAlert } from "lucide-react";
+import { ArrowLeft, UserPlus, Mail } from "lucide-react";
 
 export default function PengaturanAdminPage() {
   const admins = [
@@ -51,7 +51,7 @@ export default function PengaturanAdminPage() {
 
       <div className="bg-white rounded-3xl p-6 border border-[#2BA8A2]/15 shadow-card-custom">
         <div className="divide-y divide-gray-100">
-          {admins.map((admin, idx) => (
+          {admins.map((admin) => (
             <div
               key={admin.email}
               className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4"

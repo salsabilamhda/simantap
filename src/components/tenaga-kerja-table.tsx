@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { INITIAL_TENAGA_KERJA } from "@/lib/sample-data";
 import { TenagaKerja, StatusTenagaKerja, SkemaTenagaKerja, JenisKelamin } from "@/types/tenaga-kerja";
@@ -18,12 +18,10 @@ import {
   Phone,
   User,
   Shield,
-  Briefcase,
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
   Star,
-  FileSpreadsheet,
 } from "lucide-react";
 
 interface TenagaKerjaTableProps {
@@ -41,18 +39,13 @@ export default function TenagaKerjaTable({ initialOpenAdd = false }: TenagaKerja
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
 
-  // Modals state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(initialOpenAdd);
+  // Modals state - initialize directly based on searchParams or initialOpenAdd
+  const [isAddModalOpen, setIsAddModalOpen] = useState(
+    () => initialOpenAdd || searchParams?.get("tambah") === "true"
+  );
   const [selectedDetail, setSelectedDetail] = useState<TenagaKerja | null>(null);
   const [editingWorker, setEditingWorker] = useState<TenagaKerja | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Auto-open add modal if query parameter ?tambah=true is present
-  useEffect(() => {
-    if (searchParams?.get("tambah") === "true") {
-      setIsAddModalOpen(true);
-    }
-  }, [searchParams]);
 
   // Form State for Add Worker
   const defaultFormData: Omit<TenagaKerja, "id"> = {
@@ -119,10 +112,20 @@ export default function TenagaKerjaTable({ initialOpenAdd = false }: TenagaKerja
     return filteredData.slice(startIndex, startIndex + pageSize);
   }, [filteredData, currentPage, pageSize]);
 
-  // Reset to page 1 on filter change
-  useEffect(() => {
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
     setCurrentPage(1);
-  }, [searchQuery, selectedUnit, selectedStatus]);
+  };
+
+  const handleUnitChange = (val: string) => {
+    setSelectedUnit(val);
+    setCurrentPage(1);
+  };
+
+  const handleStatusChange = (val: string) => {
+    setSelectedStatus(val);
+    setCurrentPage(1);
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -302,12 +305,12 @@ export default function TenagaKerjaTable({ initialOpenAdd = false }: TenagaKerja
               type="text"
               placeholder="Cari berdasarkan nama tenaga kerja, NIK, atau divisi..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full bg-[#F8FAFC] border border-gray-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-medium text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-[#2BA8A2] focus:bg-white transition-all"
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery("")}
+                onClick={() => handleSearchChange("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
               >
                 <X className="w-3.5 h-3.5" />
@@ -322,7 +325,7 @@ export default function TenagaKerjaTable({ initialOpenAdd = false }: TenagaKerja
             <div className="relative">
               <select
                 value={selectedUnit}
-                onChange={(e) => setSelectedUnit(e.target.value)}
+                onChange={(e) => handleUnitChange(e.target.value)}
                 className="bg-[#F8FAFC] border border-gray-200 rounded-2xl pl-3 pr-8 py-2.5 text-xs font-semibold text-gray-700 appearance-none cursor-pointer focus:outline-none focus:border-[#2BA8A2] transition-all"
               >
                 <option value="ALL">Semua Unit Layanan</option>
@@ -339,7 +342,7 @@ export default function TenagaKerjaTable({ initialOpenAdd = false }: TenagaKerja
             <div className="relative">
               <select
                 value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
+                onChange={(e) => handleStatusChange(e.target.value)}
                 className="bg-[#F8FAFC] border border-gray-200 rounded-2xl pl-3 pr-8 py-2.5 text-xs font-semibold text-gray-700 appearance-none cursor-pointer focus:outline-none focus:border-[#2BA8A2] transition-all"
               >
                 <option value="ALL">Semua Status</option>

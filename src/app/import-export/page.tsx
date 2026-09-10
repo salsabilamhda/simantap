@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, UploadCloud, Download, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, UploadCloud, Download, FileSpreadsheet, CheckCircle2 } from "lucide-react";
 
 export default function ImportExportPage() {
   const [isExporting, setIsExporting] = useState(false);
