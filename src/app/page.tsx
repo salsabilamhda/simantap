@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import StatCard from "@/components/stat-card";
 import TenagaKerjaTable from "@/components/tenaga-kerja-table";
 import UnitDistribution from "@/components/unit-distribution";
@@ -39,11 +40,11 @@ export default function DashboardPage() {
           {/* Quick Action Buttons */}
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <Link
-              href="/tenaga-kerja/tambah"
+              href="/tenaga-kerja?tambah=true"
               className="btn-gold-primary px-5 py-3 text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer flex-1 md:flex-initial"
             >
               <PlusCircle className="w-4 h-4 text-[#2C3E50]" />
-              Tambah Personil
+              Tambah Tenaga Kerja
             </Link>
 
             <Link
@@ -174,7 +175,9 @@ export default function DashboardPage() {
 
       {/* Tenaga Kerja Table Section */}
       <div>
-        <TenagaKerjaTable />
+        <Suspense fallback={<div className="h-96 bg-white rounded-3xl animate-pulse" />}>
+          <TenagaKerjaTable />
+        </Suspense>
       </div>
 
     </div>

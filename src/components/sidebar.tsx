@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  UserPlus,
   FileSpreadsheet,
   Building2,
   Briefcase,
@@ -47,11 +46,6 @@ export default function Sidebar() {
           href: "/tenaga-kerja",
           icon: Users,
           badge: "198",
-        },
-        {
-          name: "Tambah Personil",
-          href: "/tenaga-kerja/tambah",
-          icon: UserPlus,
         },
         {
           name: "Impor & Ekspor Excel",

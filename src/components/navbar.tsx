@@ -66,7 +66,7 @@ export default function Navbar() {
           {/* CTA & User Profile */}
           <div className="flex items-center gap-3">
             <Link
-              href="/tenaga-kerja/tambah"
+              href="/tenaga-kerja?tambah=true"
               className="btn-gold-primary px-4 py-2.5 flex items-center gap-2 text-xs uppercase tracking-wider cursor-pointer"
             >
               <PlusCircle className="w-4 h-4 text-[#2C3E50]" />
