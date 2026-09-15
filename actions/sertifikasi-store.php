@@ -24,7 +24,6 @@ if (isset($_FILES['gambar_sertifikat']) && $_FILES['gambar_sertifikat']['error']
     $allowed  = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     $finfo    = finfo_open(FILEINFO_MIME_TYPE);
     $mimeType = finfo_file($finfo, $file['tmp_name']);
-    finfo_close($finfo);
 
     if ($file['size'] > $maxSize) {
         flash_set('error', 'File terlalu besar. Maksimum 5MB.');
