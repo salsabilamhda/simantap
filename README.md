@@ -1,161 +1,201 @@
-# SIMANTAP — Sistem Manajemen Data Tenaga Kerja
+# SIMANTAP
 
-Aplikasi web internal modern untuk sentralisasi dan pengelolaan data tenaga kerja outsourcing/mitra serta riwayat sertifikasi di lingkungan kerja unit layanan (ULP Balong, ULP Pacitan, ULP Ponorogo, ULP Trenggalek, dan UP3 Ponorogo).
+SIMANTAP adalah aplikasi manajemen data tenaga kerja berbasis PHP native dan MySQL untuk mendukung kebutuhan operasional data personil mitra/outsourcing di lingkungan kerja UP3 dan Unit Layanan.
 
----
-
-## 📌 Latar Belakang & Tujuan
-
-Sebelumnya, data tenaga kerja dikelola secara manual melalui berkas Excel. Hal ini menimbulkan tantangan berupa risiko duplikasi, kesulitan pencarian, serta berkas bukti sertifikasi yang tercecer terpisah dari data profil tenaga kerja.
-
-**SIMANTAP** hadir untuk:
-1. **Sentralisasi Data**: Mengintegrasikan seluruh data tenaga kerja ke dalam satu database terpusat yang dapat diakses dan diperbarui secara *real-time* oleh admin.
-2. **Digitalisasi Sertifikasi**: Menghubungkan riwayat serta berkas bukti fisik sertifikat (multi-sertifikasi) langsung ke profil masing-masing tenaga kerja.
-3. **Kompatibilitas Penuh**: Mendukung alur kerja impor dan ekspor data Excel yang kompatibel dengan format template eksisting.
-4. **Efisiensi Biaya Operasional**: Mengoptimalkan arsitektur serverless (*free tier*) menggunakan Next.js di Vercel, Firebase (Auth & Firestore), dan Cloudinary.
+Aplikasi ini digunakan untuk mengelola data tenaga kerja, master data unit layanan, perusahaan mitra, sertifikat, serta akses admin dalam satu sistem yang sederhana, cepat, dan mudah dikelola di lingkungan Laragon/XAMPP.
 
 ---
 
-## ✨ Fitur Utama
+## Ringkasan proyek
 
-### 1. 🔐 Autentikasi & Manajemen Admin
-- Autentikasi berbasis email & kata sandi via **Firebase Authentication**.
-- Pembagian peran pengguna:
-  - **Super Admin**: Akses penuh ke seluruh fitur dan manajemen akun admin lain.
-  - **Admin**: Akses operasional harian (CRUD data tenaga kerja, sertifikasi, impor & ekspor).
-- Proteksi route berbasis middleware untuk memastikan seluruh data internal terlindungi.
+SIMANTAP dirancang untuk membantu admin mengelola informasi tenaga kerja secara terpusat, termasuk:
 
-### 2. 📊 Dashboard Ringkasan & Analitik
-- Ringkasan metrik total tenaga kerja, distribusi per status kerja (PKWT/PKWTT), dan skema kerja.
-- Distribusi tenaga kerja per Unit Layanan (replikasi fungsi pivot Sheet1 template).
-- Visualisasi grafik komposisi tenaga kerja berdasarkan unit layanan dan jenis kelamin.
-- Feed aktivitas penambahan dan pembaruan data terbaru.
+- data personal dan kepegawaian
+- status kerja PKWTT / PKWT
+- unit layanan dan perusahaan mitra
+- nomor BPJS, DPLK, dan nomor perjanjian kerja
+- riwayat sertifikat dan upload bukti sertifikat
+- dashboard ringkasan data
+- ekspor data ke format CSV/Excel-style
 
-### 3. 👥 Manajemen Data Tenaga Kerja (CRUD)
-- **Daftar & Pencarian**: Tabel data dengan pagination, pencarian fleksibel (Nama, NIK), dan filter dinamis (Unit Layanan, Perusahaan, Status, Skema).
-- **Form Input & Validasi**: Validasi ketat untuk format NIK (16 digit), nomor telepon/WhatsApp, email, serta kalkulasi otomatis usia berdasarkan tanggal lahir.
-- **Detail Profil**: Tampilan profil komprehensif mencakup data pribadi, kepegawaian, BPJS, DPLK, dan daftar sertifikasi yang dimiliki.
-- **Pembaruan & Penghapusan**: Fleksibilitas edit data dan proteksi konfirmasi saat penghapusan.
-
-### 4. 📜 Manajemen Sertifikasi (Multi-Sertifikasi)
-- Mendukung relasi 1 tenaga kerja memiliki banyak sertifikasi.
-- Input nomor sertifikat, judul sertifikasi, tanggal terbit, dan masa berlaku.
-- Unggah berkas/foto bukti sertifikat ke **Cloudinary** dengan pratinjau galeri gambar.
-- Sinkronisasi otomatis penghapusan aset di Cloudinary ketika sertifikasi dihapus.
-
-### 5. 📥 Impor & Ekspor Excel
-- **Impor Data**: Unggah berkas `.xlsx` sesuai template, dilengkapi dengan validasi data, pratinjau sebelum simpan, dan opsi untuk menimpa data berdasarkan NIK.
-- **Ekspor Data**: Mengunduh data tenaga kerja (seluruhnya atau hasil filter) ke format Excel dengan struktur kolom yang sesuai template acuan.
-
-### 6. ⚙️ Master Data
-- Pengelolaan master data Unit Layanan dan Perusahaan Mitra untuk menjamin konsistensi data dan dropdown pilihan.
+Aplikasi ini tidak menggunakan framework modern seperti Next.js atau Firebase; seluruh project berjalan di PHP native dan database MySQL.
 
 ---
 
-## 🛠️ Arsitektur & Teknologi
+## Fitur utama
 
-```
-[Browser Admin] ────────► [Next.js App (Vercel)]
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        ▼                       ▼                       ▼
-Firebase Authentication   Firebase Firestore    API Route (Server Proxy)
- (Login & Sesi Admin)    (Data TK & Sertifikasi)        │
-                                                        ▼
-                                                    Cloudinary
-                                              (Penyimpanan Sertifikat)
-```
+### 1. Dashboard
+- menampilkan total tenaga kerja
+- ringkasan status kerja PKWTT dan PKWT
+- distribusi tenaga kerja per unit layanan
+- data terbaru yang tersimpan di database
 
-| Komponen | Teknologi | Keterangan |
-|---|---|---|
-| **Frontend Framework** | Next.js 14+ (App Router, TypeScript) | Performa tinggi dengan React Server Components |
-| **Styling & UI** | Tailwind CSS + shadcn/ui | Desain modern, bersih, dan konsisten |
-| **Database** | Firebase Firestore | Database NoSQL dokumen real-time |
-| **Autentikasi** | Firebase Authentication | Manajemen sesi login aman |
-| **Media Storage** | Cloudinary | Penyimpanan gambar sertifikat gratis dengan optimasi otomatis |
-| **Excel Parser/Generator**| SheetJS (`xlsx`) | Pemrosesan impor dan ekspor file Excel |
-| **Deployment** | Vercel | Hosting serverless global dengan integrasi Git otomatis |
+### 2. Manajemen tenaga kerja
+- tambah data tenaga kerja
+- edit dan hapus data
+- pencarian berdasarkan nama, NIK, atau jabatan
+- filter berdasarkan unit dan status kerja
+- pagination untuk daftar data
+
+### 3. Master data
+- master data unit layanan
+- master data perusahaan mitra
+- konsistensi data untuk dropdown dan referensi pada form
+
+### 4. Sertifikat tenaga kerja
+- setiap tenaga kerja dapat memiliki beberapa sertifikat
+- simpan nomor sertifikat, judul, tanggal terbit, dan tanggal kadaluarsa
+- unggah file bukti sertifikat ke folder upload lokal
+- data sertifikat terkait langsung dengan tenaga kerja tertentu
+
+### 5. Impor dan ekspor data
+- fitur ekspor data tenaga kerja dalam format CSV/Excel-style
+- data dapat didownload sesuai kebutuhan operasional
+- file template struktur umum dibuat sesuai kebutuhan database internal
+
+### 6. Akses admin
+- pengelolaan pengguna admin melalui panel admin
+- sistem login berbasis session dan password hash
+- akses dipisahkan sesuai kebutuhan aplikasi
 
 ---
 
-## 🗂️ Struktur Data Utama
+## Teknologi yang digunakan
 
-- **`tenagaKerja`**: Dokumen utama penyimpan biodata, informasi kontrak kerja, nomor perjanjian, BPJS Kesehatan & Ketenagakerjaan, DPLK, dsb.
-- **`tenagaKerja/{id}/sertifikasi`**: Sub-koleksi untuk menyimpan riwayat sertifikasi dan URL gambar dari Cloudinary.
-- **`unitLayanan`**: Master data unit (ULP Balong, ULP Pacitan, ULP Ponorogo, ULP Trenggalek, UP3 Ponorogo).
-- **`perusahaan`**: Master data perusahaan mitra dan nomor perjanjian kerja sama.
-- **`admins`**: Data pengguna sistem dan role-nya (Super Admin / Admin).
+- PHP native
+- MySQL
+- PDO untuk koneksi database
+- HTML, CSS, dan JavaScript
+- Bootstrap/Tailwind-like styling via custom CSS classes
+- Laragon sebagai lingkungan local development
 
 ---
 
-## 🗺️ Struktur Rute / Halaman
+## Struktur folder utama
 
-```bash
-/login                          # Halaman masuk sistem
-/dashboard                      # Dashboard analitik & ringkasan statistik
-/tenaga-kerja                   # Daftar data tenaga kerja + pencarian & filter
-/tenaga-kerja/tambah            # Form penambahan data tenaga kerja
-/tenaga-kerja/[id]              # Profil detail tenaga kerja & sertifikasi
-/tenaga-kerja/[id]/edit         # Form ubah data tenaga kerja
-/tenaga-kerja/import            # Unggah & pratinjau impor Excel
-/master-data/unit-layanan       # Kelola master Unit Layanan
-/master-data/perusahaan         # Kelola master Perusahaan
-/pengaturan/admin               # Manajemen akun admin (Super Admin only)
+```text
+simantap/
+├─ actions/                 # proses simpan, update, hapus data
+├─ includes/                # layout header/sidebar/footer dan form reusable
+├─ sql/                     # file backup/schema MySQL
+├─ uploads/                 # folder file sertifikat
+├─ config.php               # konfigurasi database dan base URL
+├─ db.php                   # helper koneksi PDO dan query database
+├─ dashboard.php            # halaman dashboard utama
+├─ index.php                # redirect ke dashboard
+├─ tenaga-kerja.php         # halaman data tenaga kerja
+├─ master-data-unit.php     # master unit layanan
+├─ master-data-perusahaan.php # master perusahaan mitra
+├─ import-export.php        # halaman ekspor/import data
+├─ pengaturan-admin.php     # pengaturan admin
+├─ export.php               # ekspor data ke file
+├─ README.md                # dokumentasi proyek
+└─ .
 ```
 
 ---
 
-## 🚀 Rencana Pengembangan (Roadmap)
+## Struktur database utama
 
-- [ ] **Fase 1 (MVP)**: Inisialisasi Next.js, konfigurasi Firebase Auth & Firestore, implementasi autentikasi, CRUD data tenaga kerja, dan dashboard ringkasan.
-- [ ] **Fase 2**: Modul sertifikasi lengkap (upload gambar via Cloudinary, galeri pratinjau) dan fitur ekspor Excel.
-- [ ] **Fase 3**: Fitur impor Excel dengan validasi format kolom, pencegahan NIK ganda, dan pratinjau interaktif.
-- [ ] **Fase 4 (Lanjutan)**: Notifikasi pengingat kedaluwarsa kontrak/sertifikat, pencatatan audit log aktivitas, dan peran admin spesifik per unit.
+Database yang digunakan adalah `simantap` dan memiliki tabel utama berikut:
 
----
+- `unit_layanans` : data unit layanan
+- `perusahaans` : data perusahaan mitra
+- `tenaga_kerjas` : data utama tenaga kerja
+- `sertifikasis` : riwayat sertifikat per tenaga kerja
+- `users` : akun admin
 
-## 💻 Panduan Menjalankan Proyek (Lokal)
+File schema lengkap ada di:
 
-### 1. Kloning Repositori
-```bash
-git clone https://github.com/salsabilamhda/simantap.git
-cd simantap
-```
-
-### 2. Instalasi Dependensi
-```bash
-npm install
-# atau
-pnpm install
-# atau
-yarn install
-```
-
-### 3. Konfigurasi Variabel Lingkungan
-Buat berkas `.env.local` pada root direktori dan sesuaikan kredensial berikut:
-
-```env
-# Firebase Client SDK
-NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
-
-# Cloudinary (Server-side Upload)
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-```
-
-### 4. Menjalankan Server Pengembangan
-```bash
-npm run dev
-```
-Buka [http://localhost:3000](http://localhost:3000) pada browser Anda.
+- [sql/simantap.sql](sql/simantap.sql)
 
 ---
 
-## 📄 Lisensi & Hak Penggunaan
-Proyek ini dikembangkan secara khusus untuk kebutuhan internal manajemen operasional data ketenagakerjaan.
+## Konfigurasi default
+
+Konfigurasi database bawaan dibuat di [config.php](config.php):
+
+```text
+Host     : 127.0.0.1
+Port     : 3306
+Database : simantap
+Username : root
+Password : (kosong)
+```
+
+Jika penggunaan database Anda berbeda, sesuaikan nilai di [config.php](config.php) terlebih dahulu.
+
+---
+
+## Cara menjalankan di Laragon
+
+### 1. Siapkan folder proyek
+
+Letakkan project di folder berikut:
+
+```text
+C:\laragon\www\simantap
+```
+
+### 2. Jalankan Apache dan MySQL
+
+- buka Laragon
+- klik Start All
+
+### 3. Import database
+
+1. buka http://localhost/phpmyadmin
+2. buat database `simantap` jika belum ada
+3. import file [sql/simantap.sql](sql/simantap.sql)
+4. tunggu sampai proses import selesai
+
+### 4. Akses aplikasi
+
+Buka URL berikut di browser:
+
+```text
+http://localhost/simantap
+```
+
+Aplikasi akan otomatis mengarahkan ke halaman dashboard setelah dibuka.
+
+---
+
+## Login default
+
+Data admin bawaan sudah disediakan di file SQL, yaitu:
+
+- Email: admin@simantap.id
+- Password: admin123
+
+> Password bawaan tersebut sesuai dengan seed data yang sudah ada di database untuk kebutuhan pengujian awal.
+
+---
+
+## Catatan penting
+
+- Folder upload sertifikat berada di [uploads/sertifikat](uploads/sertifikat)
+- Semua file foto atau bukti sertifikat disimpan secara lokal di project ini
+- Aplikasi ini dibuat untuk kebutuhan internal dan bukan aplikasi multi-tenant penuh
+- Untuk kebutuhan produksi, perlu ditambahkan validasi lanjutan, manajemen role lebih ketat, dan backup database otomatis
+
+---
+
+## Lisensi
+
+Proyek ini dibuat untuk kebutuhan internal pengelolaan data tenaga kerja dan operasional unit kerja yang terkait.
+
+---
+
+## Status proyek
+
+Project ini sudah memiliki:
+
+- dashboard utama
+- CRUD tenaga kerja
+- master data unit dan perusahaan
+- data sertifikat
+- fitur ekspor data
+- autentikasi admin dasar
+
+Dengan demikian, README ini sudah sesuai dengan kondisi nyata aplikasi yang ada di workspace ini.
