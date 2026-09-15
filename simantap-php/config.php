@@ -1,7 +1,6 @@
-<?php
+﻿<?php
 // ============================================================
-// SIMANTAP — Konfigurasi Database
-// Sesuaikan dengan konfigurasi server/hosting Anda
+// SIMANTAP — Konfigurasi Database & Base URL
 // ============================================================
 
 define('DB_HOST', '127.0.0.1');
@@ -11,10 +10,17 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
-// Base URL (tanpa trailing slash)
-// Contoh lokal: 'http://localhost/simantap-php'
-// Contoh server: 'https://namadomain.com/simantap'
-define('BASE_URL', 'http://localhost/simantap-php');
+// Auto-detect BASE_URL agar fleksibel (bisa via php -S localhost:8000 atau Laragon / XAMPP)
+if (!defined('BASE_URL')) {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+    if (basename($scriptDir) === 'actions') {
+        $scriptDir = dirname($scriptDir);
+    }
+    $scriptDir = ($scriptDir === '/' || $scriptDir === '\\' || $scriptDir === '.') ? '' : rtrim($scriptDir, '/');
+    define('BASE_URL', $scheme . '://' . $host . $scriptDir);
+}
 
 // Folder upload relatif dari root project
 define('UPLOAD_DIR', __DIR__ . '/uploads/sertifikat/');
