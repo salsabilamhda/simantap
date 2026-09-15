@@ -52,6 +52,9 @@ Aplikasi ini tidak menggunakan framework modern seperti Next.js atau Firebase; s
 - fitur ekspor data tenaga kerja dalam format CSV/Excel-style
 - data dapat didownload sesuai kebutuhan operasional
 - file template struktur umum dibuat sesuai kebutuhan database internal
+- import data tenaga kerja dari `.xlsx` atau `.xls` memakai SheetJS di browser
+- preview data sebelum dikirim sebagai JSON ke endpoint PHP native
+- proses import tidak membutuhkan Composer, PhpSpreadsheet, atau folder `vendor`
 
 ### 6. Akses admin
 - pengelolaan pengguna admin melalui panel admin
