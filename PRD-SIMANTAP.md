@@ -1,56 +1,52 @@
-# PRD — Sistem Manajemen Data Tenaga Kerja
+# PRD — Sistem Manajemen Data Tenaga Kerja (SIMANTAP)
 
-**Versi:** 1.0
-**Tanggal:** 9 September 2026
+**Versi:** 2.0 (Pembaruan Arsitektur: PHP / Laravel + MySQL)  
+**Tanggal Pembaruan:** 15 September 2026  
 **Sumber Data Acuan:** `TEMPLATE_TENAGA_KERJA_UPDATE_JULI_2026_SESUAI_DATABASE.xlsx`
 
 ---
 
 ## 1. Ringkasan Eksekutif
 
-Aplikasi web internal untuk mengelola data tenaga kerja outsourcing/mitra (198+ record saat ini, tersebar di 5 Unit Layanan: ULP Balong, ULP Pacitan, ULP Ponorogo, ULP Trenggalek, UP3 Ponorogo). Aplikasi menggantikan pengelolaan manual via Excel dengan sistem CRUD berbasis web yang mendukung:
+Aplikasi web internal untuk mengelola data tenaga kerja outsourcing/mitra (198+ record saat ini, tersebar di 5 Unit Layanan: ULP Balong, ULP Pacitan, ULP Ponorogo, ULP Trenggalek, UP3 Ponorogo). Aplikasi menggantikan pengelolaan manual via Excel dengan sistem web terpusat yang mendukung:
 
-- Login admin
-- Kelola data tenaga kerja (CRUD penuh)
-- Kelola sertifikasi per tenaga kerja (1 orang bisa punya banyak sertifikasi + upload gambar sertifikat)
-- Import & export data ke/dari Excel (kompatibel dengan format template asli)
-- Dashboard ringkasan (setara Sheet1 pivot: jumlah tenaga kerja per Unit Layanan)
+- Autentikasi dan manajemen admin
+- Kelola data tenaga kerja (CRUD lengkap)
+- Kelola sertifikasi per tenaga kerja (multi-sertifikasi + upload berkas/foto sertifikat)
+- Import & export data ke/dari Excel & CSV
+- Dashboard ringkasan (distribusi tenaga kerja per Unit Layanan & statistik status kerja)
+- Master data Unit Layanan dan Perusahaan mitra
 
-**Stack:** Next.js (App Router) + Firebase (Auth, Firestore) + Cloudinary (penyimpanan gambar sertifikat) + Vercel (hosting gratis).
-
-> **Update:** Penyimpanan gambar sertifikat menggunakan **Cloudinary**, bukan Firebase Storage. Sejak 3 Februari 2026, Firebase mewajibkan paket berbayar (Blaze) dengan kartu kredit terdaftar untuk mengakses Cloud Storage — termasuk project baru. Cloudinary dipilih karena gratis tanpa kartu kredit, kuota jauh lebih lega (~25GB/bulan), dan punya fitur auto-resize/compress gambar bawaan. Firestore & Firebase Auth tetap dipakai seperti rencana semula.
+> **Pembaruan Arsitektur (v2.0):**  
+> Sistem telah diperbarui dari rancangan awal (Next.js + Firebase) menjadi **PHP (Laravel Framework) + MySQL (dikelola via phpMyAdmin)**. Seluruh penyimpanan berkas sertifikat menggunakan **Laravel Public Storage** lokal (`storage/app/public/sertifikasi`) tanpa dependensi ke layanan pihak ketiga (Cloudinary/Firebase).
 
 ---
 
 ## 2. Latar Belakang & Tujuan
 
-Saat ini data tenaga kerja dikelola manual di Excel, rawan duplikasi, sulit dicari, dan tidak ada riwayat sertifikasi yang terpusat (bukti sertifikat masih terpisah dari data). Tujuan proyek:
+Saat ini data tenaga kerja dikelola manual di Excel, rawan duplikasi, sulit dicari, dan tidak ada riwayat sertifikasi yang terpusat. Tujuan proyek:
 
-1. Sentralisasi data tenaga kerja dalam satu database yang bisa diakses & diedit banyak admin secara real-time.
-2. Digitalisasi bukti sertifikasi (nomor + gambar sertifikat) yang terhubung langsung ke masing-masing tenaga kerja.
-3. Tetap kompatibel dengan alur kerja lama lewat fitur import/export Excel.
-4. Biaya operasional rendah/nol (hosting gratis di Vercel, Firebase free tier).
+1. **Sentralisasi Data:** Seluruh data tenaga kerja disimpan dalam basis data relasional MySQL (`simantap`) yang mudah diakses dan dikelola oleh admin secara lokal/intranet.
+2. **Digitalisasi Bukti Sertifikasi:** Nomor dan berkas sertifikat terhubung langsung dengan profil tenaga kerja (one-to-many relationship).
+3. **Kompatibilitas:** Menyediakan fitur import dan export Excel/CSV yang sesuai dengan format eksisting.
+4. **Kemudahan Pemeliharaan:** Menggunakan stack standar industri PHP/Laravel yang mudah dijalankan di lingkungan server lokal (XAMPP/phpMyAdmin) maupun server intranet instansi.
 
 ---
 
 ## 3. Ruang Lingkup
 
-### 3.1 In-Scope (MVP)
-- Autentikasi admin (login/logout)
-- CRUD data tenaga kerja
-- CRUD sertifikasi per tenaga kerja (multi-sertifikasi + upload gambar)
-- Import data dari file Excel (`.xlsx`)
-- Export data ke Excel (sesuai struktur kolom template asli)
-- Dashboard ringkasan jumlah tenaga kerja per Unit Layanan (setara Sheet1)
-- Pencarian & filter data (per Unit Layanan, Perusahaan, Status Kontrak, dll.)
-- Master data Unit Layanan & Perusahaan
+### 3.1 In-Scope (Fitur Aktif)
+- **Dashboard Ringkasan:** Statistik total tenaga kerja, distribusi per Unit Layanan, per Perusahaan, dan per Status Kontrak.
+- **CRUD Tenaga Kerja:** Tambah, lihat detail, perbarui, dan hapus data tenaga kerja beserta filter pencarian cepat.
+- **Manajemen Sertifikasi:** Tambah berkas sertifikat per tenaga kerja, preview dokumen/gambar, dan hapus berkas.
+- **Master Data:** Kelola data Unit Layanan (ULP Balong, ULP Pacitan, ULP Ponorogo, ULP Trenggalek, UP3 Ponorogo) dan Perusahaan mitra.
+- **Pengaturan Admin:** Manajemen user admin dan hak akses.
+- **Import & Export:** Export data ke CSV/Excel dan import data template tenaga kerja.
 
-### 3.2 Out-of-Scope (Fase Berikutnya / Nice-to-have)
-- Notifikasi otomatis sertifikat/kontrak akan kedaluwarsa
-- Approval workflow multi-level
-- Multi-role granular (misalnya admin per Unit Layanan saja)
-- Audit log perubahan data
-- Aplikasi mobile native
+### 3.2 Out-of-Scope (Fase Lanjutan)
+- Notifikasi otomatis kedaluwarsa sertifikat via WhatsApp/Email.
+- Approval workflow berjenjang antar-bidang.
+- Integrasi Single Sign-On (SSO) korporat.
 
 ---
 
@@ -58,200 +54,141 @@ Saat ini data tenaga kerja dikelola manual di Excel, rawan duplikasi, sulit dica
 
 | Role | Deskripsi | Akses |
 |---|---|---|
-| **Super Admin** | Pengelola utama sistem | Semua fitur + kelola akun admin lain |
-| **Admin** | Operator harian (HR/Admin ULP/UP3) | CRUD tenaga kerja & sertifikasi, import/export |
-
-Login menggunakan Firebase Authentication (email + password). Tidak ada akses publik/tanpa login — seluruh aplikasi berada di balik autentikasi.
+| **Super Admin** | Pengelola sistem utama | Akses penuh ke seluruh menu, kelola user admin, master data, dan data tenaga kerja |
+| **Admin Unit / Staff** | Pengelola operasional | Input, ubah, export, dan verifikasi data tenaga kerja serta berkas sertifikasi |
 
 ---
 
-## 5. Struktur Data (Data Model)
+## 5. Model Data & Skema Database (MySQL)
 
-Struktur ini diturunkan langsung dari 30 kolom sheet **Duplikat**, dikelompokkan menjadi beberapa entitas agar sertifikasi bisa 1-ke-banyak.
+Database MySQL dikelola via phpMyAdmin dengan nama basis data: **`simantap`**.
 
-### 5.1 Collection `tenagaKerja`
-| Field | Tipe | Sumber Kolom Excel | Keterangan |
-|---|---|---|---|
-| id | string (auto) | - | Firestore doc ID |
-| nomorPerjanjian | string | Nomor Perjanjian | No. perjanjian kerja sama perusahaan |
-| namaPerusahaan | string | Nama Perusahaan | Bisa dropdown dari master `perusahaan` |
-| nama | string | Nama | |
-| nik | string | NIK | Validasi 16 digit |
-| tempatLahir | string | Tempat Lahir | |
-| tanggalLahir | date | Tanggal Tahun Lahir | Usia dihitung otomatis (bukan disimpan statis) |
-| pendidikanTerakhir | string | Pendidikan Terakhir | Dropdown: SD/SMP/SMA/SMK/D3/S1/S2 |
-| jurusan | string | Jurusan | |
-| noTelepon | string | No Telepon (WA) | |
-| email | string | Email | |
-| jenisKelamin | enum | Jenis Kelamin | LAKI / PEREMPUAN |
-| alamatDomisili | string | Alamat Domisili | |
-| kotaKabupaten | string | Kota/Kabupaten | |
-| provinsi | string | Provinsi | |
-| jabatanTerakhir | string | Jabatan Terakhir | |
-| fungsiPekerjaan | string | Fungsi Pekerjaan | |
-| unit | string | Unit | |
-| unitLayananId | string (ref) | Unit Layanan | Referensi ke master `unitLayanan` |
-| noBpjsKesehatan | string | Nomor BPJS Kesehatan | |
-| noBpjsKetenagakerjaan | string | Nomor BPJS Ketenagakerjaan | |
-| noDplk | string | Nomor DPLK | |
-| bankDplk | string | Bank DPLK | |
-| noPerjanjianKerja | string | Nomor perjanjian kerja PKWT/PKWTT | |
-| tanggalMasukKerja | date | Tanggal masuk kerja | |
-| statusTenagaKerja | enum | Status Tenaga Kerja | PKWT / PKWTT |
-| skemaTenagaKerja | enum | Skema Tenaga Kerja | Pemborongan / Volume Based |
-| createdAt / updatedAt | timestamp | - | Metadata sistem |
+### 5.1 Tabel `tenaga_kerjas`
+Menyimpan data identitas dan status kepegawaian tenaga kerja.
 
-> Catatan: kolom **No** (nomor urut) dan **Usia di Tahun 2026** dari Excel tidak disimpan statis — nomor urut mengikuti urutan tampilan, dan usia dihitung otomatis dari tanggal lahir agar selalu akurat kapan pun diakses.
-
-### 5.2 Sub-collection `tenagaKerja/{id}/sertifikasi`
-Mendukung 1 tenaga kerja → banyak sertifikasi.
-
-| Field | Tipe | Sumber Kolom Excel | Keterangan |
-|---|---|---|---|
-| id | string (auto) | - | |
-| nomorSertifikat | string | Nomor Sertifikat (Sertifikasi Wajib) | |
-| judulSertifikasi | string | Judul Sertifikasi | |
-| gambarSertifikatUrl | string (URL) | (baru) | Hasil upload ke Cloudinary, disimpan sebagai URL |
-| cloudinaryPublicId | string | (baru) | ID aset di Cloudinary, dibutuhkan untuk hapus/ganti gambar |
-| tanggalTerbit | date | (baru, opsional) | Untuk kebutuhan tracking masa berlaku |
-| tanggalKadaluarsa | date | (baru, opsional) | Untuk fitur reminder di fase berikutnya |
-| createdAt | timestamp | - | |
-
-### 5.3 Collection `unitLayanan` (master data)
-`{ id, nama, unitInduk }` — diisi awal: ULP Balong, ULP Pacitan, ULP Ponorogo, ULP Trenggalek, UP3 Ponorogo.
-
-### 5.4 Collection `perusahaan` (master data)
-`{ id, nama, nomorPerjanjian }` — memudahkan dropdown & konsistensi penulisan nama perusahaan.
-
-### 5.5 Collection `admins`
-`{ uid, nama, email, role: 'superadmin' | 'admin', createdAt }` — terhubung ke Firebase Auth UID.
-
----
-
-## 6. Fitur & Kebutuhan Fungsional
-
-### 6.1 Autentikasi
-- Login via email/password (Firebase Auth)
-- Proteksi semua route dengan middleware/guard — redirect ke `/login` jika belum autentikasi
-- Super Admin dapat menambah/menonaktifkan akun admin lain
-
-### 6.2 Dashboard
-- Kartu ringkasan: total tenaga kerja, jumlah per status (PKWT/PKWTT), jumlah per Unit Layanan (replikasi Sheet1)
-- Grafik sederhana (bar chart) distribusi per Unit Layanan & jenis kelamin
-- Daftar tenaga kerja yang baru ditambahkan/diubah
-
-### 6.3 Manajemen Data Tenaga Kerja
-- **List**: tabel dengan pagination, pencarian (nama/NIK), filter (Unit Layanan, Perusahaan, Status, Skema)
-- **Create**: form input lengkap sesuai model 5.1, dengan validasi (NIK 16 digit, email format, no. HP format)
-- **Detail**: halaman profil tenaga kerja menampilkan seluruh data + daftar sertifikasi miliknya
-- **Update**: edit seluruh field
-- **Delete**: hapus data (dengan konfirmasi; sertifikasi terkait ikut terhapus)
-
-### 6.4 Manajemen Sertifikasi
-- Dari halaman detail tenaga kerja: tombol "Tambah Sertifikasi"
-- Form: nomor sertifikat, judul sertifikasi, upload gambar (jpg/png/pdf), tanggal terbit (opsional)
-- Gambar diupload ke Cloudinary (via API route Next.js agar API secret tidak terekspos ke client), URL & public ID hasil upload disimpan di Firestore
-- List sertifikasi per orang ditampilkan sebagai kartu/galeri dengan preview gambar
-- Edit & hapus per sertifikasi (hapus di Firestore sekaligus hapus aset di Cloudinary menggunakan `cloudinaryPublicId`)
-
-### 6.5 Import Excel
-- Upload file `.xlsx` sesuai template kolom pada sheet **Duplikat**
-- Preview data sebelum disimpan (tampilkan baris yang error/tidak valid, misal NIK ganda atau kosong)
-- Opsi: **tambah data baru** atau **timpa/update berdasarkan NIK**
-- Ringkasan hasil import: berhasil / gagal / dilewati
-
-### 6.6 Export Excel
-- Export seluruh data atau hasil filter saat ini
-- Format output kolom mengikuti struktur asli (No, Nomor Perjanjian, Nama Perusahaan, ... dst)
-- Kolom sertifikasi (Nomor Sertifikat, Judul Sertifikasi) digabung jika 1 orang punya lebih dari 1 sertifikasi (dipisah dengan koma/baris baru), agar tetap kompatibel dengan format 1 baris = 1 orang
-
-### 6.7 Master Data
-- CRUD sederhana untuk Unit Layanan dan Perusahaan (agar dropdown selalu konsisten & tidak typo)
-
----
-
-## 7. Kebutuhan Non-Fungsional
-
-| Aspek | Kebutuhan |
-|---|---|
-| Keamanan | Firestore Security Rules: hanya user terautentikasi (role admin) yang bisa read/write. Data sensitif (NIK, BPJS) tidak diekspos ke endpoint publik. |
-| Responsif | Tampilan optimal di desktop & tablet (prioritas admin bekerja dari komputer/laptop) |
-| Performa | List data pakai pagination/virtualization agar tetap ringan meski data bertambah ribuan baris |
-| Ketersediaan | Hosting di Vercel (uptime tinggi, auto-scaling gratis untuk trafik kecil-menengah) |
-| Biaya | Tetap dalam batas free tier Vercel & Firebase Spark selama volume data & trafik rendah (lihat catatan §9) |
-| Backup | Export Excel berkala berfungsi juga sebagai backup manual; opsional: scheduled export via Cloud Function di fase lanjut |
-
----
-
-## 8. Arsitektur Teknis
-
-**Frontend & Backend logic:** Next.js 14+ (App Router, TypeScript), Tailwind CSS + shadcn/ui untuk komponen UI konsisten.
-
-**Database:** Firebase Firestore (NoSQL) — cocok untuk struktur data tenaga kerja + sub-collection sertifikasi.
-
-**Autentikasi:** Firebase Authentication (Email/Password).
-
-**Penyimpanan file:** Cloudinary — untuk gambar/scan sertifikat. Upload dilakukan lewat API route Next.js (server-side) yang memanggil Cloudinary API menggunakan API secret tersimpan di environment variable Vercel, sehingga kredensial tidak terekspos ke browser.
-
-**Import/Export Excel:** library `xlsx` (SheetJS) untuk parsing & generate file di sisi client/server.
-
-**Deployment:** Vercel (frontend + API routes Next.js) — terhubung ke Firebase project via environment variables (API key publik Firebase aman untuk diekspos di client, keamanan tetap dijaga lewat Firestore Security Rules) dan ke Cloudinary via API key/secret di environment variable server-side.
-
-```
-[Browser Admin] → [Next.js App di Vercel]
-                         │
-             ┌───────────┼──────────────┐
-             ▼           ▼              ▼
-     Firebase Auth   Firestore    API Route Next.js
-     (login admin)  (data TK &    (proxy upload) → Cloudinary
-                     sertifikasi)                  (gambar sertifikat)
-```
-
----
-
-## 9. Catatan Biaya & Batasan Free Tier
-
-- **Vercel Hobby (gratis):** cukup untuk trafik internal skala kecil-menengah.
-- **Firebase Spark (gratis, tanpa kartu kredit):** Firestore (1GiB storage, 50rb baca/hari, 20rb tulis/hari) & Auth (50rb pengguna aktif) cukup longgar untuk ±200–2000 record data tenaga kerja. Sejak 3 Februari 2026, **Firebase Storage tidak lagi tersedia di paket Spark** — karena itu, gambar sertifikat disimpan di Cloudinary, bukan Firebase Storage, sehingga project ini bisa tetap 100% gratis tanpa perlu mendaftarkan kartu kredit ke Google.
-- **Cloudinary (gratis, tanpa kartu kredit):** kuota ±25GB storage & bandwidth/bulan — jauh lebih dari cukup untuk ratusan file gambar sertifikat, dengan fitur auto-resize/compress bawaan agar file besar tidak cepat menghabiskan kuota.
-
----
-
-## 10. Struktur Menu Aplikasi
-
-```
-/login
-/dashboard                     → ringkasan & statistik
-/tenaga-kerja                  → list + search + filter
-/tenaga-kerja/tambah           → form tambah
-/tenaga-kerja/[id]             → detail + daftar sertifikasi
-/tenaga-kerja/[id]/edit        → form edit
-/tenaga-kerja/import           → upload & preview import Excel
-/master-data/unit-layanan
-/master-data/perusahaan
-/pengaturan/admin              → kelola akun admin (super admin only)
-```
-
----
-
-## 11. Rencana Bertahap (Roadmap)
-
-| Fase | Fitur | Estimasi |
+| Field | Tipe Data | Keterangan |
 |---|---|---|
-| **Fase 1 — MVP** | Setup Next.js + Firebase, login admin, CRUD tenaga kerja, dashboard dasar | 1–2 minggu |
-| **Fase 2** | Modul sertifikasi (upload gambar), export Excel | 1 minggu |
-| **Fase 3** | Import Excel + validasi & preview | 1 minggu |
-| **Fase 4 (opsional)** | Notifikasi kedaluwarsa sertifikat/kontrak, audit log, role granular per Unit Layanan | menyusul |
+| `id` | BIGINT (PK, Auto Increment) | Primary Key |
+| `nik` | VARCHAR(16) | Nomor Induk Kependudukan (Unik) |
+| `nama` | VARCHAR(255) | Nama lengkap tenaga kerja |
+| `tanggal_lahir` | DATE | Tanggal lahir |
+| `jenis_kelamin` | ENUM('L', 'P') | Laki-laki / Perempuan |
+| `jabatan` | VARCHAR(255) | Posisi / jabatan |
+| `unit_layanan_id` | BIGINT (FK) | Relasi ke tabel `unit_layanans` |
+| `perusahaan_id` | BIGINT (FK) | Relasi ke tabel `perusahaans` |
+| `status_kontrak` | VARCHAR(50) | PKWT / PKWTT / Mitra |
+| `nomor_kontrak` | VARCHAR(100) (Nullable) | Nomor kontrak / perjanjian kerja |
+| `created_at`, `updated_at` | TIMESTAMP | Waktu pembuatan & pembaruan |
+
+### 5.2 Tabel `sertifikasis`
+Menyimpan sertifikasi yang dimiliki oleh masing-masing tenaga kerja (Relasi 1-to-Many).
+
+| Field | Tipe Data | Keterangan |
+|---|---|---|
+| `id` | BIGINT (PK, Auto Increment) | Primary Key |
+| `tenaga_kerja_id` | BIGINT (FK) | Relasi ke `tenaga_kerjas.id` (Cascade delete) |
+| `nomor_sertifikat` | VARCHAR(255) | Nomor registrasi sertifikat |
+| `judul_sertifikasi` | VARCHAR(255) | Nama kompetensi / sertifikasi |
+| `file_path` | VARCHAR(255) | Path penyimpanan berkas di `public/storage/sertifikasi` |
+| `tanggal_terbit` | DATE (Nullable) | Tanggal terbit sertifikat |
+| `created_at`, `updated_at` | TIMESTAMP | Waktu pembuatan & pembaruan |
+
+### 5.3 Tabel `unit_layanans` (Master Data)
+| Field | Tipe Data | Keterangan |
+|---|---|---|
+| `id` | BIGINT (PK, Auto Increment) | Primary Key |
+| `nama` | VARCHAR(255) | Nama unit (ULP Balong, ULP Pacitan, ULP Ponorogo, ULP Trenggalek, UP3 Ponorogo) |
+| `unit_induk` | VARCHAR(255) (Nullable) | Unit induk (UP3 Ponorogo) |
+| `created_at`, `updated_at` | TIMESTAMP | Waktu pembuatan & pembaruan |
+
+### 5.4 Tabel `perusahaans` (Master Data)
+| Field | Tipe Data | Keterangan |
+|---|---|---|
+| `id` | BIGINT (PK, Auto Increment) | Primary Key |
+| `nama` | VARCHAR(255) | Nama vendor / mitra penyedia |
+| `nomor_perjanjian` | VARCHAR(255) (Nullable) | Nomor kontrak kerja sama mitra |
+| `created_at`, `updated_at` | TIMESTAMP | Waktu pembuatan & pembaruan |
+
+### 5.5 Tabel `users` (Admin & Akses)
+| Field | Tipe Data | Keterangan |
+|---|---|---|
+| `id` | BIGINT (PK, Auto Increment) | Primary Key |
+| `name` | VARCHAR(255) | Nama admin |
+| `email` | VARCHAR(255) (Unique) | Email untuk login |
+| `password` | VARCHAR(255) | Hash password (Bcrypt) |
+| `role` | VARCHAR(50) | `superadmin` / `admin` |
+| `created_at`, `updated_at` | TIMESTAMP | Waktu pembuatan & pembaruan |
 
 ---
 
-## 12. Asumsi & Pertanyaan Terbuka
+## 6. Arsitektur Teknis & Implementasi
 
-1. Kolom **Fungsi Pekerjaan** di data existing masih kosong semua — apakah tetap perlu ditampilkan sebagai field wajib?
-2. Apakah 1 sertifikat bisa dipakai lebih dari 1 orang, atau selalu unik per orang? (asumsi saat ini: unik per orang, disimpan sebagai sub-collection)
-3. Apakah dibutuhkan riwayat perubahan data (log siapa mengubah apa)? (masuk fase lanjut jika ya)
-4. Berapa perkiraan pertambahan data tenaga kerja per tahun? (memengaruhi keputusan paket Firebase)
+```
+[Browser Admin / Client]
+           │
+           ▼
+[Web Server (Apache / Nginx / Artisan)]
+           │
+           ▼
+[Laravel Application Framework (PHP 8.1+)]
+  ├── Routing & Middleware (routes/web.php)
+  ├── Controllers (App\Http\Controllers)
+  ├── Eloquent ORM Models (App\Models)
+  └── Views (Blade Templating + Tailwind CSS)
+           │
+     ┌─────┴────────────────┐
+     ▼                      ▼
+[MySQL Database]     [File Storage]
+(Database: simantap) (storage/app/public)
+(via phpMyAdmin)     (symlink ke public/storage)
+```
+
+- **Backend:** Laravel Framework (PHP 8.1+) dengan pola arsitektur MVC.
+- **Frontend:** Laravel Blade Templating Engine dengan styling modern Tailwind CSS.
+- **Database Engine:** MySQL / MariaDB via XAMPP / phpMyAdmin (`DB_DATABASE=simantap`).
+- **File Storage:** Laravel Local Public Disk (`php artisan storage:link`).
+- **Development Server:** `php artisan serve` (Port 8000).
 
 ---
 
-*Dokumen ini dapat disesuaikan lebih lanjut sebelum development dimulai.*
+## 7. Struktur Menu & Routing Aplikasi
+
+| Route URL | Controller & Method | Deskripsi |
+|---|---|---|
+| `/` & `/dashboard` | `DashboardController@index` | Dashboard ringkasan, chart, dan statistik tenaga kerja |
+| `/tenaga-kerja` | `TenagaKerjaController@index` | Daftar tabel tenaga kerja, pagination, search & filter |
+| `/tenaga-kerja` (POST) | `TenagaKerjaController@store` | Simpan data tenaga kerja baru |
+| `/tenaga-kerja/{id}` (PUT) | `TenagaKerjaController@update` | Update data tenaga kerja |
+| `/tenaga-kerja/{id}` (DELETE) | `TenagaKerjaController@destroy` | Hapus data tenaga kerja beserta sertifikasinya |
+| `/tenaga-kerja/{id}/sertifikasi` | `SertifikasiController@store` | Upload dan simpan sertifikasi baru |
+| `/sertifikasi/{id}` (DELETE) | `SertifikasiController@destroy` | Hapus sertifikasi dan berkas gambar terkait |
+| `/master-data/unit-layanan` | `MasterDataController@unitLayanan` | Master data unit layanan |
+| `/master-data/perusahaan` | `MasterDataController@perusahaan` | Master data perusahaan vendor |
+| `/pengaturan/admin` | `PengaturanAdminController@index` | Manajemen pengguna admin sistem |
+| `/import-export` | `ImportExportController@index` | Halaman kelola import & export data |
+| `/import-export/export` | `ImportExportController@exportCsv` | Download data tenaga kerja dalam format CSV/Excel |
+
+---
+
+## 8. Panduan Menjalankan Sistem Secara Lokal
+
+1. **Prasyarat:**
+   - PHP >= 8.1
+   - Composer
+   - MySQL / MariaDB (melalui XAMPP)
+2. **Langkah Konfigurasi:**
+   - Buka XAMPP Control Panel, jalankan service **Apache** dan **MySQL**.
+   - Buka phpMyAdmin (`http://localhost/phpmyadmin`) dan pastikan database **`simantap`** telah dibuat.
+   - Konfigurasi file `laravel/.env`:
+     ```env
+     DB_CONNECTION=mysql
+     DB_HOST=127.0.0.1
+     DB_PORT=3306
+     DB_DATABASE=simantap
+     DB_USERNAME=root
+     DB_PASSWORD=
+     ```
+   - Jalankan migration: `php artisan migrate`
+   - Buat symlink storage (jika belum): `php artisan storage:link`
+   - Jalankan dev server: `php artisan serve`
+   - Akses aplikasi di browser melalui `http://127.0.0.1:8000`.
