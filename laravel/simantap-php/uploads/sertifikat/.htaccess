@@ -1,0 +1,12 @@
+# Izinkan akses gambar, tapi cegah eksekusi PHP/script
+Options -ExecCGI
+AddHandler cgi-script .php .pl .py .jsp .asp .sh .cgi
+php_flag engine off
+
+<FilesMatch "\.(php|pl|py|jsp|asp|cgi|sh)$">
+  deny from all
+</FilesMatch>
+
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+  allow from all
+</FilesMatch>
