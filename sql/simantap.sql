@@ -101,6 +101,10 @@ CREATE TABLE IF NOT EXISTS `sertifikasis` (
     ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Sinkronisasi untuk database lama: judul sertifikat boleh kosong saat upload gambar.
+ALTER TABLE `sertifikasis`
+  MODIFY `judul_sertifikasi` VARCHAR(255) DEFAULT NULL;
+
 -- Seed data awal agar aplikasi dapat langsung digunakan setelah import.
 INSERT IGNORE INTO `users` (`name`, `email`, `password`, `role`, `status`)
 VALUES ('Administrator SIMANTAP', 'admin@simantap.id', '$2y$10$4BFGZ9Eb0s8K3XuiIM5AMOf4mc.D215nuQ3vGPWDhkBp0R8zKuOf6', 'superadmin', 'Aktif');
