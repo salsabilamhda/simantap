@@ -47,9 +47,20 @@ function import_required(array $row, string $key, int $rowNumber): string
 function import_date(?string $value, string $label, int $rowNumber): ?string
 {
     if ($value === null) return null;
-    foreach (['Y-m-d', 'd/m/Y', 'd-m-Y', 'm/d/Y', 'm-d-Y'] as $format) {
+    $value = preg_replace('/\x{00A0}/u', ' ', trim($value));
+    $value = preg_replace('/\s+/', ' ', $value);
+    if (is_numeric($value) && (float) $value > 0) {
+        $date = (new DateTimeImmutable('1899-12-30'))->modify('+' . (int) floor((float) $value) . ' days');
+        return $date->format('Y-m-d');
+    }
+    foreach (['Y-m-d', 'Y/m/d', 'd/m/Y', 'd-m-Y', 'd.m.Y', 'm/d/Y', 'm-d-Y', 'm.d.Y', 'j/n/Y', 'n/j/Y', 'Y-m-d H:i', 'Y-m-d H:i:s', 'd/m/Y H:i', 'd/m/Y H:i:s', 'd-m-Y H:i', 'd-m-Y H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d\TH:i:s.v\Z'] as $format) {
         $date = DateTime::createFromFormat('!' . $format, $value);
         if ($date && $date->format($format) === $value) return $date->format('Y-m-d');
+    }
+    try {
+        return (new DateTimeImmutable($value))->format('Y-m-d');
+    } catch (Throwable) {
+        // Fall through to the standard import error below.
     }
     throw new RuntimeException("$label pada baris $rowNumber tidak valid.");
 }
@@ -82,18 +93,18 @@ try {
             import_date(import_required($row, 'TANGGAL TAHUN LAHIR', $rowNumber), 'TANGGAL TAHUN LAHIR', $rowNumber),
             null,
             null,
-            import_required($row, 'NO TELEPON (WA)', $rowNumber),
+            import_value($row, 'NO TELEPON (WA)'),
             import_required($row, 'EMAIL', $rowNumber),
             import_required($row, 'JENIS KELAMIN', $rowNumber),
             import_required($row, 'ALAMAT DOMISILI', $rowNumber),
             import_required($row, 'KOTA/KABUPATEN', $rowNumber),
             import_required($row, 'PROVINSI', $rowNumber),
             import_required($row, 'JABATAN TERAKHIR', $rowNumber),
-            null,
+            import_value($row, 'FUNGSI PEKERJAAN'),
             import_required($row, 'UNIT', $rowNumber),
             import_unit_id(import_value($row, 'UNIT LAYANAN'), $rowNumber),
-            import_required($row, 'NOMOR BPJS KESEHATAN', $rowNumber),
-            import_required($row, 'NOMOR BPJS KETENAGAKERJAAN', $rowNumber),
+            import_value($row, 'NOMOR BPJS KESEHATAN'),
+            import_value($row, 'NOMOR BPJS KETENAGAKERJAAN'),
             import_required($row, 'NOMOR DPLK', $rowNumber),
             import_required($row, 'BANK DPLK', $rowNumber),
             import_required($row, 'NOMOR PERJANJIAN KERJA PKWT/PKWTT', $rowNumber),
@@ -102,8 +113,8 @@ try {
             import_required($row, 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)', $rowNumber),
             ],
             'certificate' => [
-                import_required($row, 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)', $rowNumber),
-                import_required($row, 'JUDUL SERTIFIKASI', $rowNumber),
+                import_value($row, 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)'),
+                import_value($row, 'JUDUL SERTIFIKASI'),
             ],
         ];
     }
@@ -115,7 +126,9 @@ try {
     db()->beginTransaction();
     foreach ($records as $record) {
         $statement->execute($record['worker']);
-        $certificateStatement->execute([db()->lastInsertId(), $record['certificate'][0], $record['certificate'][1]]);
+        if ($record['certificate'][1] !== null) {
+            $certificateStatement->execute([db()->lastInsertId(), $record['certificate'][0], $record['certificate'][1]]);
+        }
     }
     db()->commit();
     echo json_encode(['success' => true, 'message' => count($records) . ' data tenaga kerja berhasil diimport.'], JSON_UNESCAPED_UNICODE);

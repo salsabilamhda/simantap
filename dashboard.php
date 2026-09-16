@@ -150,45 +150,6 @@ include __DIR__ . '/includes/layout-sidebar.php';
             </div>
         </div>
 
-        <!-- Info Card -->
-        <div class="bg-white rounded-3xl p-6 border border-teal-100 shadow-card-custom flex flex-col justify-between">
-            <div>
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
-                        <i data-lucide="briefcase" class="w-4 h-4"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-black text-gray-900">Ringkasan Mitra</h2>
-                        <p class="text-[11px] text-gray-400">Penyedia Jasa &amp; Sistem</p>
-                    </div>
-                </div>
-                <div class="p-4 rounded-2xl bg-teal-50/50 border border-teal-100 mb-4">
-                    <div class="text-[11px] font-bold text-gray-400 uppercase">Perusahaan Penyedia Utama</div>
-                    <div class="text-sm font-black text-primaryDark mt-0.5">PT ANUGERAH PUTRA PERMANA</div>
-                    <div class="text-xs text-gray-500 mt-1">No. Kontrak: 1211,Pj/DAN,00,07/F04000000/2024</div>
-                </div>
-                <div class="space-y-3 text-xs">
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50">
-                        <span class="text-gray-500 font-medium">Framework Backend:</span>
-                        <span class="font-black text-teal-700">PHP Native</span>
-                    </div>
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50">
-                        <span class="text-gray-500 font-medium">Database Server:</span>
-                        <span class="font-black text-teal-700">MySQL / phpMyAdmin</span>
-                    </div>
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50">
-                        <span class="text-gray-500 font-medium">Skema Mayoritas:</span>
-                        <span class="font-black text-gray-800">Pemborongan</span>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6 pt-4 border-t border-gray-100">
-                <a href="<?= BASE_URL ?>/tenaga-kerja.php" class="w-full py-2.5 rounded-2xl bg-teal-50 text-primaryDark hover:bg-teal-100 text-xs font-black flex items-center justify-center gap-2 transition-colors">
-                    <span>Lihat Seluruh Tenaga Kerja</span>
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                </a>
-            </div>
-        </div>
     </div>
 
     <!-- Recent Workers Table -->

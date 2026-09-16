@@ -81,7 +81,7 @@ simantap/
 ├─ actions/                 # proses simpan, update, hapus data
 ├─ includes/                # layout header/sidebar/footer dan form reusable
 ├─ sql/                     # file backup/schema MySQL
-├─ uploads/                 # folder file sertifikat
+├─ assets/sertifikat/       # folder file sertifikat
 ├─ config.php               # konfigurasi database dan base URL
 ├─ db.php                   # helper koneksi PDO dan query database
 ├─ dashboard.php            # halaman dashboard utama
@@ -177,7 +177,7 @@ Data admin bawaan sudah disediakan di file SQL, yaitu:
 
 ## Catatan penting
 
-- Folder upload sertifikat berada di [uploads/sertifikat](uploads/sertifikat)
+- Folder upload sertifikat berada di [assets/sertifikat](assets/sertifikat)
 - Semua file foto atau bukti sertifikat disimpan secara lokal di project ini
 - Aplikasi ini dibuat untuk kebutuhan internal dan bukan aplikasi multi-tenant penuh
 - Untuk kebutuhan produksi, perlu ditambahkan validasi lanjutan, manajemen role lebih ketat, dan backup database otomatis

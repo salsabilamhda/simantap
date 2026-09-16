@@ -47,7 +47,7 @@ if (isset($_FILES['gambar_sertifikat']) && $_FILES['gambar_sertifikat']['error']
     if (move_uploaded_file($file['tmp_name'], $dest)) {
         $filePath = UPLOAD_URL . $fileName;
     } else {
-        flash_set('error', 'Gagal menyimpan file. Periksa permission folder uploads/sertifikat/');
+        flash_set('error', 'Gagal menyimpan file. Periksa permission folder assets/sertifikat/');
         redirect(BASE_URL . '/tenaga-kerja.php');
     }
 }

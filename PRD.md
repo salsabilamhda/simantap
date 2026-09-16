@@ -137,7 +137,7 @@ Data utama mencakup identitas, kontak, alamat, pendidikan, jabatan/fungsi, perus
 - **Konsistensi:** relasi tenaga kerja-unit dan tenaga kerja-sertifikasi menjaga integritas referensi.
 - **Kompatibilitas:** berjalan pada PHP native dengan MySQL/MariaDB di Laragon atau XAMPP; UI harus dapat dipakai pada desktop dan perangkat mobile.
 - **Pemeliharaan:** konfigurasi database dipisahkan dari halaman; struktur action dan include dipertahankan modular.
-- **Data:** backup database dan folder `uploads/sertifikat` harus dilakukan sebelum deployment atau migrasi.
+- **Data:** backup database dan folder `assets/sertifikat` harus dilakukan sebelum deployment atau migrasi.
 
 ## 8. Model Data Inti
 

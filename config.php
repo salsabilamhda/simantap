@@ -22,6 +22,6 @@ if (!defined('BASE_URL')) {
     define('BASE_URL', $scheme . '://' . $host . $scriptDir);
 }
 
-// Folder upload relatif dari root project
-define('UPLOAD_DIR', __DIR__ . '/uploads/sertifikat/');
-define('UPLOAD_URL', BASE_URL . '/uploads/sertifikat/');
+// Folder aset sertifikat relatif dari root project
+define('UPLOAD_DIR', __DIR__ . '/assets/sertifikat/');
+define('UPLOAD_URL', BASE_URL . '/assets/sertifikat/');

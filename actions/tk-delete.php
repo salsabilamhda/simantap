@@ -15,10 +15,10 @@ if (!$tk) {
 }
 
 // Hapus file sertifikat terkait
-$serts = db_query("SELECT file_path FROM sertifikasis WHERE tenaga_kerja_id = ?", [$id]);
+$serts = db_query("SELECT gambar_sertifikat_url FROM sertifikasis WHERE tenaga_kerja_id = ?", [$id]);
 foreach ($serts as $s) {
-    if ($s['file_path'] && file_exists(UPLOAD_DIR . basename($s['file_path']))) {
-        @unlink(UPLOAD_DIR . basename($s['file_path']));
+    if ($s['gambar_sertifikat_url'] && file_exists(UPLOAD_DIR . basename($s['gambar_sertifikat_url']))) {
+        @unlink(UPLOAD_DIR . basename($s['gambar_sertifikat_url']));
     }
 }
 

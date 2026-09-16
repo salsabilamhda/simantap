@@ -100,7 +100,8 @@ include __DIR__ . '/includes/layout-sidebar.php';
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const importCsrf = <?= json_encode(csrf_token()) ?>;
-const importHeaders = ['NO', 'NOMOR PERJANJIAN', 'NAMA PERUSAHAAN', 'NAMA', 'NIK', 'TEMPAT LAHIR', 'TANGGAL TAHUN LAHIR', 'NO TELEPON (WA)', 'EMAIL', 'JENIS KELAMIN', 'ALAMAT DOMISILI', 'KOTA/KABUPATEN', 'PROVINSI', 'JABATAN TERAKHIR', 'UNIT', 'UNIT LAYANAN', 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)', 'JUDUL SERTIFIKASI', 'NOMOR BPJS KESEHATAN', 'NOMOR BPJS KETENAGAKERJAAN', 'NOMOR DPLK', 'BANK DPLK', 'NOMOR PERJANJIAN KERJA PKWT/PKWTT', 'TANGGAL MASUK KERJA', 'STATUS TENAGA KERJA (PKWT/PKWTT)', 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)'];
+const importHeaders = ['NO', 'NOMOR PERJANJIAN', 'NAMA PERUSAHAAN', 'NAMA', 'NIK', 'TEMPAT LAHIR', 'TANGGAL TAHUN LAHIR', 'NO TELEPON (WA)', 'EMAIL', 'JENIS KELAMIN', 'ALAMAT DOMISILI', 'KOTA/KABUPATEN', 'PROVINSI', 'JABATAN TERAKHIR', 'FUNGSI PEKERJAAN', 'UNIT', 'UNIT LAYANAN', 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)', 'JUDUL SERTIFIKASI', 'NOMOR BPJS KESEHATAN', 'NOMOR BPJS KETENAGAKERJAAN', 'NOMOR DPLK', 'BANK DPLK', 'NOMOR PERJANJIAN KERJA PKWT/PKWTT', 'TANGGAL MASUK KERJA', 'STATUS TENAGA KERJA (PKWT/PKWTT)', 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)'];
+const optionalImportHeaders = new Set(['NO TELEPON (WA)', 'FUNGSI PEKERJAAN', 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)', 'JUDUL SERTIFIKASI', 'NOMOR BPJS KESEHATAN', 'NOMOR BPJS KETENAGAKERJAAN']);
 let importRows = [];
 
 function importMessage(text, success = false) {
@@ -133,10 +134,26 @@ document.getElementById('excel-file').addEventListener('change', (event) => {
     reader.onload = (loadEvent) => {
         try {
             const workbook = XLSX.read(loadEvent.target.result, {type: 'array', cellDates: true});
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(sheet, {defval: '', raw: false});
-            const normalizedRows = rows.map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [key.replace(/^\uFEFF/, '').trim().toUpperCase(), String(value).replace(/^'/, '').trim()]))).filter((row) => Object.values(row).some(Boolean));
-            const missingHeaders = importHeaders.filter((header) => !Object.keys(normalizedRows[0] || {}).includes(header));
+            const headerAliases = {
+                'SKEMA TENAGA KERJA (PEMBORONGAN / VOLUME BASED)': 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)',
+            };
+            const normalizeHeader = (key) => {
+                const normalizedKey = String(key).replace(/^\uFEFF/, '').trim().toUpperCase();
+                return headerAliases[normalizedKey] || normalizedKey;
+            };
+            const selectedSheet = workbook.SheetNames.map((sheetName) => {
+                const sheet = workbook.Sheets[sheetName];
+                const previewRows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: '', raw: false});
+                const headerRow = previewRows.findIndex((row) => {
+                    const headers = row.map(normalizeHeader);
+                    return importHeaders.filter((header) => headers.includes(header)).length >= 3;
+                });
+                return {sheet, headerRow};
+            }).find(({headerRow}) => headerRow >= 0);
+            if (!selectedSheet) throw new Error('Tidak ditemukan sheet Excel yang berisi header data tenaga kerja.');
+            const rows = XLSX.utils.sheet_to_json(selectedSheet.sheet, {defval: '', raw: false, range: selectedSheet.headerRow});
+            const normalizedRows = rows.map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [normalizeHeader(key), String(value).replace(/^'/, '').trim()]))).filter((row) => Object.values(row).some(Boolean));
+            const missingHeaders = importHeaders.filter((header) => !optionalImportHeaders.has(header) && !Object.keys(normalizedRows[0] || {}).includes(header));
             if (missingHeaders.length) throw new Error(`Kolom wajib belum ada: ${missingHeaders.join(', ')}`);
             renderImportPreview(normalizedRows);
             importMessage(`${normalizedRows.length} baris siap diproses. Periksa preview terlebih dahulu.`, normalizedRows.length > 0);
