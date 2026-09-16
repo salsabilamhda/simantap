@@ -162,7 +162,9 @@ function paginationUrl(int $p): string {
                             <td class="py-3.5 px-3 sm:px-4"><span class="font-bold text-gray-800"><?= h($row['unit_nama'] ?: $row['unit'] ?: '-') ?></span></td>
                             <td class="py-3.5 px-3 sm:px-4 w-[190px] max-w-[190px]">
                                 <div class="font-bold text-gray-800 whitespace-normal break-words leading-snug"><?= h($row['jabatan_terakhir'] ?: '-') ?></div>
-                                <div class="text-[11px] text-gray-400 whitespace-normal break-words leading-snug"><?= h($row['fungsi_pekerjaan'] ?: '-') ?></div>
+                                <?php if (!empty($row['fungsi_pekerjaan'])): ?>
+                                    <div class="text-[11px] text-gray-400 whitespace-normal break-words leading-snug mt-0.5"><?= h($row['fungsi_pekerjaan']) ?></div>
+                                <?php endif; ?>
                             </td>
                             <td class="py-3.5 px-3 sm:px-4">
                                 <div class="inline-block px-2.5 py-1 rounded-full text-[10px] font-black <?= $row['status_tenaga_kerja'] === 'PKWTT' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-rose-100 text-rose-800 border border-rose-300' ?>">
