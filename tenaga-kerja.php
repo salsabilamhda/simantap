@@ -45,8 +45,16 @@ $workers = db_query("
 // For each worker, get sertifikasi JSON
 foreach ($workers as &$w) {
     $w['sertifikasis'] = db_query(
-        "SELECT * FROM sertifikasis WHERE tenaga_kerja_id = ?", [$w['id']]
+        "SELECT * FROM sertifikasis WHERE tenaga_kerja_id = ? ORDER BY id DESC", [$w['id']]
     );
+    foreach ($w['sertifikasis'] as &$s) {
+        if (!empty($s['gambar_sertifikat_url'])) {
+            if (!preg_match('~^https?://~i', $s['gambar_sertifikat_url'])) {
+                $s['gambar_sertifikat_url'] = UPLOAD_URL . basename($s['gambar_sertifikat_url']);
+            }
+        }
+    }
+    unset($s);
     $w['usia'] = hitung_usia($w['tanggal_lahir']);
 }
 unset($w);
@@ -261,16 +269,44 @@ function paginationUrl(int $p): string {
 <!-- ============================================================ -->
 <!-- MODAL: Detail Tenaga Kerja -->
 <!-- ============================================================ -->
-<div id="detail-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-teal-50/50">
-            <div>
-                <h3 id="detail-nama" class="text-xl font-black text-gray-900"></h3>
-                <p id="detail-nik" class="text-xs text-gray-400 font-bold"></p>
+<div id="detail-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden" onclick="closeDetailModal(event)">
+    <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-teal-100 animate-in fade-in zoom-in-95 duration-200" onclick="event.stopPropagation()">
+        <!-- Header -->
+        <div class="p-5 sm:p-6 border-b border-teal-100 flex items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-teal-50/90 via-teal-50/40 to-white">
+            <div class="flex items-center gap-3.5">
+                <div id="detail-avatar" class="w-12 h-12 rounded-2xl bg-teal-600 text-white font-black text-base flex items-center justify-center shadow-teal-glow shrink-0 uppercase">
+                    TK
+                </div>
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 id="detail-nama" class="text-xl font-black text-gray-900 tracking-tight"></h3>
+                        <span id="detail-status-badge"></span>
+                    </div>
+                    <p id="detail-nik" class="text-xs text-gray-500 font-bold mt-0.5"></p>
+                </div>
             </div>
-            <button onclick="document.getElementById('detail-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-white text-gray-400 hover:text-gray-600 flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <button onclick="document.getElementById('detail-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-white text-gray-400 hover:text-gray-700 flex items-center justify-center shadow-xs transition-colors shrink-0">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
         </div>
-        <div id="detail-content" class="p-6 overflow-y-auto space-y-4 text-xs font-medium"></div>
+
+        <!-- Body -->
+        <div id="detail-content" class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs font-medium bg-gray-50/40"></div>
+
+        <!-- Footer -->
+        <div class="p-4 sm:p-5 border-t border-gray-100 bg-white flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+            <button type="button" onclick="document.getElementById('detail-modal').classList.add('hidden')" class="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors text-center">
+                Tutup
+            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="openCertFromDetail()" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-primaryDark text-xs font-bold border border-teal-200 flex items-center justify-center gap-1.5 transition-colors">
+                    <i data-lucide="award" class="w-4 h-4 text-primary"></i><span>Kelola Sertifikasi</span>
+                </button>
+                <button type="button" onclick="openEditFromDetail()" class="flex-1 sm:flex-initial btn-gold-primary px-5 py-2.5 text-xs uppercase tracking-wider gap-1.5 justify-center">
+                    <i data-lucide="pencil" class="w-4 h-4"></i><span>Edit Data</span>
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -315,12 +351,25 @@ function paginationUrl(int $p): string {
 </div>
 
 <!-- MODAL: Preview Gambar Sertifikat -->
-<div id="certificate-image-modal" class="fixed inset-0 z-[60] bg-black/75 flex items-center justify-center p-4 hidden" onclick="closeCertificateImage(event)">
-    <div class="relative max-w-4xl max-h-[90vh]" onclick="event.stopPropagation()">
-        <button type="button" onclick="closeCertificateImage()" title="Tutup gambar" class="absolute -right-3 -top-3 z-10 w-9 h-9 rounded-full bg-white text-gray-600 hover:text-gray-900 flex items-center justify-center shadow-lg">
-            <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-        <img id="certificate-image-preview" src="" alt="Gambar sertifikat" class="block max-w-full max-h-[85vh] rounded-xl shadow-2xl bg-white object-contain">
+<div id="certificate-image-modal" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden" onclick="closeCertificateImage(event)">
+    <div class="relative max-w-4xl max-h-[92vh] flex flex-col items-center w-full" onclick="event.stopPropagation()">
+        <div class="w-full flex items-center justify-between mb-3 text-white">
+            <div class="flex items-center gap-2">
+                <i data-lucide="award" class="w-4 h-4 text-accentGold"></i>
+                <span id="certificate-image-title" class="text-xs font-black tracking-wide">Lampiran Gambar Sertifikat</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <a id="certificate-image-download" href="" target="_blank" download class="px-3 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold flex items-center gap-1 transition-colors">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i><span>Unduh</span>
+                </a>
+                <button type="button" onclick="closeCertificateImage()" title="Tutup gambar" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+        <div class="bg-gray-900 rounded-2xl overflow-hidden shadow-2xl p-2 border border-white/10 flex items-center justify-center max-h-[80vh] w-full">
+            <img id="certificate-image-preview" src="" alt="Gambar sertifikat" class="block max-w-full max-h-[78vh] rounded-xl object-contain bg-black/30">
+        </div>
     </div>
 </div>
 
@@ -426,11 +475,25 @@ function openEditModal(w) {
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
 function closeCertModal() { document.getElementById('cert-modal').classList.add('hidden'); }
-function openCertificateImage(url) {
+
+let currentDetailWorker = null;
+
+function closeDetailModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('detail-modal').classList.add('hidden');
+}
+
+function openCertificateImage(url, title = 'Lampiran Gambar Sertifikat') {
+    if (!url) return;
     document.getElementById('certificate-image-preview').src = url;
+    const titleEl = document.getElementById('certificate-image-title');
+    if (titleEl) titleEl.innerText = title;
+    const downloadEl = document.getElementById('certificate-image-download');
+    if (downloadEl) downloadEl.href = url;
     document.getElementById('certificate-image-modal').classList.remove('hidden');
     lucide.createIcons();
 }
+
 function closeCertificateImage(event) {
     if (event && event.target !== event.currentTarget) return;
     document.getElementById('certificate-image-modal').classList.add('hidden');
@@ -445,30 +508,295 @@ function closeImportModal() {
     document.getElementById('import-modal').classList.add('hidden');
 }
 
+function escHtml(str) {
+    if (str == null || str === '') return '-';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function formatTanggalIndo(str) {
+    if (!str || str === '0000-00-00') return '-';
+    try {
+        const parts = str.split('-');
+        if (parts.length === 3) {
+            const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const day = parseInt(parts[2], 10);
+            const mon = parseInt(parts[1], 10) - 1;
+            const year = parts[0];
+            if (bulan[mon] && !isNaN(day)) return `${day} ${bulan[mon]} ${year}`;
+        }
+        return str;
+    } catch (e) {
+        return str;
+    }
+}
+
 function openDetailModal(w) {
-    document.getElementById('detail-nama').innerText = w.nama;
-    document.getElementById('detail-nik').innerText = 'NIK: ' + (w.nik || '-') + ' • Usia: ' + (w.usia || '-');
+    currentDetailWorker = w;
+    const avatarEl = document.getElementById('detail-avatar');
+    if (avatarEl) {
+        const initials = (w.nama || 'TK').trim().split(/\s+/).slice(0, 2).map(n => n[0]).join('').toUpperCase();
+        avatarEl.innerText = initials || 'TK';
+    }
+    
+    document.getElementById('detail-nama').innerText = w.nama || 'Tanpa Nama';
+    
+    const usiaText = w.usia ? ` • Usia: ${w.usia}` : '';
+    document.getElementById('detail-nik').innerText = `NIK: ${w.nik || '-'}${usiaText}`;
+    
+    const badgeStatus = document.getElementById('detail-status-badge');
+    if (badgeStatus) {
+        const isPkwtt = (w.status_tenaga_kerja || '').toUpperCase().includes('PKWTT');
+        badgeStatus.className = `px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider ${
+            isPkwtt ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
+        }`;
+        badgeStatus.innerText = `${w.status_tenaga_kerja || 'STATUS -'}${w.skema_tenaga_kerja ? ' (' + w.skema_tenaga_kerja + ')' : ''}`;
+    }
+
+    // Phone & Email with clickable actions
+    const phoneClean = (w.no_telepon || '').replace(/[^0-9]/g, '');
+    const waLink = phoneClean.length >= 8 
+        ? (phoneClean.startsWith('0') ? '62' + phoneClean.slice(1) : phoneClean)
+        : null;
+
+    const phoneHtml = w.no_telepon 
+        ? `<div class="flex items-center gap-2">
+             <span class="font-bold text-gray-900">${escHtml(w.no_telepon)}</span>
+             ${waLink ? `<a href="https://wa.me/${waLink}" target="_blank" title="Hubungi via WhatsApp" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-bold border border-emerald-200 transition-colors"><i data-lucide="message-circle" class="w-3 h-3"></i>WhatsApp</a>` : ''}
+           </div>`
+        : '<span class="font-bold text-gray-400">-</span>';
+
+    const emailHtml = w.email 
+        ? `<a href="mailto:${escHtml(w.email)}" class="font-bold text-teal-700 hover:underline inline-flex items-center gap-1.5"><i data-lucide="mail" class="w-3.5 h-3.5 text-teal-600"></i>${escHtml(w.email)}</a>`
+        : '<span class="font-bold text-gray-400">-</span>';
+
+    // Sertifikasi items HTML
+    const certCount = (w.sertifikasis && w.sertifikasis.length) || 0;
+    let certListHtml = '';
+    if (certCount > 0) {
+        certListHtml = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${w.sertifikasis.map((c, idx) => `
+                    <div class="p-4 rounded-2xl border border-teal-100 bg-white shadow-xs flex flex-col justify-between gap-3 relative overflow-hidden group hover:border-primary transition-all">
+                        <div class="space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-xl bg-teal-50 text-primary flex items-center justify-center shrink-0">
+                                        <i data-lucide="award" class="w-4 h-4"></i>
+                                    </div>
+                                    <div class="font-black text-gray-900 text-xs leading-snug">
+                                        ${escHtml(c.judul_sertifikasi || 'Sertifikasi Kompetensi')}
+                                    </div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-primaryDark shrink-0">
+                                    #${idx + 1}
+                                </span>
+                            </div>
+                            <div class="text-[11px] text-gray-500 space-y-1 pl-9">
+                                <div><span class="text-gray-400">No. Sertifikat:</span> <strong class="text-gray-800 font-bold">${escHtml(c.nomor_sertifikat)}</strong></div>
+                                ${c.tanggal_terbit ? `<div><span class="text-gray-400">Tgl Terbit:</span> <strong class="text-gray-700 font-semibold">${formatTanggalIndo(c.tanggal_terbit)}</strong></div>` : ''}
+                                ${c.tanggal_kadaluarsa ? `<div><span class="text-gray-400">Berlaku Hingga:</span> <strong class="text-gray-700 font-semibold">${formatTanggalIndo(c.tanggal_kadaluarsa)}</strong></div>` : ''}
+                            </div>
+                        </div>
+
+                        ${c.gambar_sertifikat_url ? `
+                            <div class="mt-1 pt-3 border-t border-gray-100 space-y-2">
+                                <div class="text-[11px] font-bold text-gray-700 flex items-center justify-between">
+                                    <span class="flex items-center gap-1.5"><i data-lucide="image" class="w-3.5 h-3.5 text-teal-600"></i>Dokumen / Gambar Sertifikat:</span>
+                                    <span class="text-[10px] text-teal-600 font-bold">Klik gambar untuk memperbesar</span>
+                                </div>
+                                <div class="relative group/img rounded-xl overflow-hidden border border-teal-200/70 bg-gray-50 cursor-pointer shadow-xs aspect-[4/3] flex items-center justify-center" onclick='openCertificateImage(${JSON.stringify(c.gambar_sertifikat_url)}, ${JSON.stringify(c.judul_sertifikasi)})'>
+                                    <img src="${escHtml(c.gambar_sertifikat_url)}" alt="Sertifikat ${escHtml(c.judul_sertifikasi)}" class="w-full h-full object-contain p-1 group-hover/img:scale-105 transition-transform duration-200">
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <span class="px-3 py-1.5 rounded-full bg-white text-gray-900 text-[11px] font-black shadow-md flex items-center gap-1.5">
+                                            <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i> Perbesar
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 pt-1">
+                                    <button type="button" onclick='openCertificateImage(${JSON.stringify(c.gambar_sertifikat_url)}, ${JSON.stringify(c.judul_sertifikasi)})' class="flex-1 py-1.5 px-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-primaryDark text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors border border-teal-200">
+                                        <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i><span>Lihat Penuh</span>
+                                    </button>
+                                    <a href="${escHtml(c.gambar_sertifikat_url)}" target="_blank" download class="py-1.5 px-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors border border-gray-200" title="Buka gambar di tab baru / Unduh">
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="mt-1 pt-3 border-t border-gray-100">
+                                <div class="p-2.5 rounded-xl bg-gray-50 border border-dashed border-gray-200 text-gray-400 text-[11px] flex items-center gap-2">
+                                    <i data-lucide="image-off" class="w-4 h-4 text-gray-400 shrink-0"></i>
+                                    <span>Belum ada lampiran gambar untuk sertifikat ini.</span>
+                                </div>
+                            </div>
+                        `}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        certListHtml = `
+            <div class="p-6 rounded-2xl border border-dashed border-gray-200 bg-white flex flex-col items-center justify-center text-center">
+                <div class="w-11 h-11 rounded-2xl bg-teal-50 text-primary flex items-center justify-center mb-2 shadow-xs">
+                    <i data-lucide="award" class="w-6 h-6"></i>
+                </div>
+                <div class="text-xs font-bold text-gray-800">Belum Ada Riwayat Sertifikasi</div>
+                <div class="text-[11px] text-gray-400 mt-1 max-w-sm">Tenaga kerja ini belum memiliki data sertifikasi kompetensi. Anda dapat mengunggah bukti sertifikat melalui tombol di bawah.</div>
+                <button type="button" onclick="openCertFromDetail()" class="mt-3 px-3.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-primaryDark text-xs font-black border border-teal-200 flex items-center gap-1.5 transition-colors shadow-xs">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Tambah Sertifikasi &amp; Gambar</span>
+                </button>
+            </div>
+        `;
+    }
+
     document.getElementById('detail-content').innerHTML = `
-        <div class="grid grid-cols-2 gap-3 p-4 rounded-2xl bg-gray-50">
-            <div><span class="text-gray-400">Unit Layanan:</span> <div class="font-bold text-gray-900">${w.unit_nama || w.unit || '-'}</div></div>
-            <div><span class="text-gray-400">Perusahaan Mitra:</span> <div class="font-bold text-gray-900">${w.nama_perusahaan || '-'}</div></div>
-            <div><span class="text-gray-400">Jabatan:</span> <div class="font-bold text-gray-900">${w.jabatan_terakhir || '-'}</div></div>
-            <div><span class="text-gray-400">Fungsi:</span> <div class="font-bold text-gray-900">${w.fungsi_pekerjaan || '-'}</div></div>
-            <div><span class="text-gray-400">Status Kontrak:</span> <div class="font-black text-primary">${w.status_tenaga_kerja} (${w.skema_tenaga_kerja || '-'})</div></div>
-            <div><span class="text-gray-400">No. HP:</span> <div class="font-bold text-gray-900">${w.no_telepon || '-'}</div></div>
-            <div><span class="text-gray-400">Pendidikan:</span> <div class="font-bold text-gray-900">${w.pendidikan_terakhir || '-'} ${w.jurusan ? '(' + w.jurusan + ')' : ''}</div></div>
-            <div><span class="text-gray-400">Alamat:</span> <div class="font-bold text-gray-900">${w.alamat_domisili || '-'}</div></div>
-            <div><span class="text-gray-400">BPJS Kesehatan:</span> <div class="font-bold text-gray-900">${w.nomor_bpjs_kesehatan || '-'}</div></div>
-            <div><span class="text-gray-400">BPJS Ketenagakerjaan:</span> <div class="font-bold text-gray-900">${w.nomor_bpjs_ketenagakerjaan || '-'}</div></div>
+        <!-- Section 1: Profil & Identitas Pribadi -->
+        <div class="rounded-2xl border border-teal-100 bg-white p-5 shadow-card-custom space-y-3">
+            <div class="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-wider pb-2 border-b border-teal-50">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span>Identitas Pribadi &amp; Kontak</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
+                <div>
+                    <span class="text-gray-400 text-[11px] block">NIK:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.nik)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Tempat, Tanggal Lahir:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.tempat_lahir)}, ${formatTanggalIndo(w.tanggal_lahir)} ${w.usia ? '(' + escHtml(w.usia) + ')' : ''}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Jenis Kelamin:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.jenis_kelamin)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Pendidikan Terakhir:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.pendidikan_terakhir)}${w.jurusan ? ' (' + escHtml(w.jurusan) + ')' : ''}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Nomor Telepon / WhatsApp:</span>
+                    ${phoneHtml}
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Email:</span>
+                    ${emailHtml}
+                </div>
+                <div class="sm:col-span-2">
+                    <span class="text-gray-400 text-[11px] block">Alamat Domisili:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.alamat_domisili)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Kota / Kabupaten &amp; Provinsi:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.kota_kabupaten)}${w.provinsi ? ', ' + escHtml(w.provinsi) : ''}</span>
+                </div>
+            </div>
         </div>
-        <div class="mt-4">
-            <div class="font-black text-gray-800 text-xs mb-2">Riwayat Sertifikasi:</div>
-            ${w.sertifikasis && w.sertifikasis.length > 0
-                ? w.sertifikasis.map(c => `<div class="p-3 rounded-xl border border-teal-100 bg-teal-50/40 mb-2"><div class="font-bold text-gray-900">${c.judul_sertifikasi}</div><div class="text-[11px] text-gray-400">No: ${c.nomor_sertifikat || '-'}</div></div>`).join('')
-                : '<div class="text-gray-400 text-xs">Belum ada sertifikasi terdaftar.</div>'}
-        </div>`;
+
+        <!-- Section 2: Pekerjaan & Penempatan -->
+        <div class="rounded-2xl border border-teal-100 bg-white p-5 shadow-card-custom space-y-3">
+            <div class="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-wider pb-2 border-b border-teal-50">
+                <i data-lucide="briefcase" class="w-4 h-4"></i>
+                <span>Pekerjaan, Penempatan &amp; Kontrak</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-xs">
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Unit Layanan (Induk):</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.unit_nama || w.unit)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Unit / Lokasi Kerja:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.unit)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Perusahaan Mitra:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.nama_perusahaan)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Jabatan Terakhir:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.jabatan_terakhir)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Fungsi Pekerjaan:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.fungsi_pekerjaan)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Status Hubungan Kerja:</span>
+                    <span class="font-black text-primaryDark">${escHtml(w.status_tenaga_kerja)} (${escHtml(w.skema_tenaga_kerja || '-')})</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">No. Perjanjian Kerja (SPK):</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.no_perjanjian_kerja)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Tanggal Masuk Kerja (TMT):</span>
+                    <span class="font-bold text-gray-900">${formatTanggalIndo(w.tanggal_masuk_kerja)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">No. Perjanjian Perusahaan Mitra:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.nomor_perjanjian)}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Jaminan Sosial & Finansial -->
+        <div class="rounded-2xl border border-teal-100 bg-white p-5 shadow-card-custom space-y-3">
+            <div class="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-wider pb-2 border-b border-teal-50">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <span>Jaminan Sosial &amp; Keuangan</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
+                <div>
+                    <span class="text-gray-400 text-[11px] block">BPJS Kesehatan:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.nomor_bpjs_kesehatan)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">BPJS Ketenagakerjaan:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.nomor_bpjs_ketenagakerjaan)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Nomor DPLK:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.nomor_dplk)}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 text-[11px] block">Bank DPLK:</span>
+                    <span class="font-bold text-gray-900">${escHtml(w.bank_dplk)}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Riwayat Sertifikasi & Gambar Sertifikat -->
+        <div class="rounded-2xl border border-teal-100 bg-teal-50/30 p-5 shadow-card-custom space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-teal-100">
+                <div class="flex items-center gap-2 text-primaryDark font-black text-xs uppercase tracking-wider">
+                    <i data-lucide="award" class="w-4 h-4"></i>
+                    <span>Riwayat Sertifikasi Kompetensi (${certCount})</span>
+                </div>
+                <button type="button" onclick="openCertFromDetail()" class="px-3 py-1 rounded-xl bg-teal-50 hover:bg-teal-100 text-primaryDark text-[11px] font-black border border-teal-200 flex items-center gap-1 transition-colors">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Kelola Sertifikasi</span>
+                </button>
+            </div>
+            ${certListHtml}
+        </div>
+    `;
+
     document.getElementById('detail-modal').classList.remove('hidden');
     lucide.createIcons();
+}
+
+function openCertFromDetail() {
+    if (!currentDetailWorker) return;
+    document.getElementById('detail-modal').classList.add('hidden');
+    openCertModal(currentDetailWorker);
+}
+
+function openEditFromDetail() {
+    if (!currentDetailWorker) return;
+    document.getElementById('detail-modal').classList.add('hidden');
+    openEditModal(currentDetailWorker);
 }
 
 function openCertModal(w) {
@@ -476,16 +804,27 @@ function openCertModal(w) {
     document.getElementById('cert-tk-id').value = w.id;
     let listHtml = w.sertifikasis && w.sertifikasis.length > 0
         ? w.sertifikasis.map(c => `
-            <div class="p-3 rounded-2xl border border-gray-200 flex items-center justify-between">
-                <div>
-                    <div class="font-bold text-gray-900 text-xs">${c.judul_sertifikasi}</div>
-                    <div class="text-[11px] text-gray-400">No: ${c.nomor_sertifikat || '-'}</div>
-                    ${c.gambar_sertifikat_url ? `<button type="button" onclick='openCertificateImage(${JSON.stringify(c.gambar_sertifikat_url)})' class="text-primary text-[11px] font-bold underline">Lihat Gambar</button>` : ''}
+            <div class="p-3.5 rounded-2xl border border-gray-200 bg-white shadow-xs flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    ${c.gambar_sertifikat_url ? `
+                        <div class="w-12 h-12 rounded-xl overflow-hidden border border-teal-100 bg-gray-50 shrink-0 cursor-pointer shadow-xs" onclick='openCertificateImage(${JSON.stringify(c.gambar_sertifikat_url)}, ${JSON.stringify(c.judul_sertifikasi)})' title="Klik untuk memperbesar">
+                            <img src="${escHtml(c.gambar_sertifikat_url)}" alt="${escHtml(c.judul_sertifikasi)}" class="w-full h-full object-cover">
+                        </div>
+                    ` : `
+                        <div class="w-12 h-12 rounded-xl bg-teal-50 text-primary flex items-center justify-center shrink-0">
+                            <i data-lucide="award" class="w-6 h-6"></i>
+                        </div>
+                    `}
+                    <div class="min-w-0">
+                        <div class="font-bold text-gray-900 text-xs truncate">${escHtml(c.judul_sertifikasi)}</div>
+                        <div class="text-[11px] text-gray-400">No: ${escHtml(c.nomor_sertifikat)}</div>
+                        ${c.gambar_sertifikat_url ? `<button type="button" onclick='openCertificateImage(${JSON.stringify(c.gambar_sertifikat_url)}, ${JSON.stringify(c.judul_sertifikasi)})' class="text-primary text-[11px] font-bold underline inline-flex items-center gap-1 mt-0.5"><i data-lucide="image" class="w-3 h-3"></i>Lihat Gambar</button>` : ''}
+                    </div>
                 </div>
                 <form method="POST" action="<?= BASE_URL ?>/actions/sertifikasi-delete.php">
                     <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
                     <input type="hidden" name="id" value="${c.id}">
-                    <button type="submit" class="text-rose-500 hover:text-rose-700 p-1" onclick="return confirm('Hapus sertifikasi ini?')">
+                    <button type="submit" class="text-rose-500 hover:text-rose-700 p-2 rounded-xl hover:bg-rose-50 transition-colors" onclick="return confirm('Hapus sertifikasi ini?')">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                 </form>

@@ -112,7 +112,10 @@ VALUES ('Administrator SIMANTAP', 'admin@simantap.id', '$2y$10$4BFGZ9Eb0s8K3XuiI
 INSERT IGNORE INTO `unit_layanans` (`kode`, `nama`, `unit_induk`, `color_hex`)
 VALUES
   ('UP3-PON', 'UP3 Ponorogo', 'UP3 Ponorogo', '#2BA8A2'),
-  ('ULP-PON', 'ULP Ponorogo', 'UP3 Ponorogo', '#F59E0B');
+  ('ULP-PON', 'ULP Ponorogo', 'UP3 Ponorogo', '#F59E0B'),
+  ('ULP-BLG', 'ULP Balong', 'UP3 Ponorogo', '#10B981'),
+  ('ULP-PCT', 'ULP Pacitan', 'UP3 Ponorogo', '#3B82F6'),
+  ('ULP-TRG', 'ULP Trenggalek', 'UP3 Ponorogo', '#8B5CF6');
 
 INSERT IGNORE INTO `perusahaans` (`nama`, `nomor_perjanjian`)
 VALUES ('Contoh Perusahaan Mitra', NULL);
