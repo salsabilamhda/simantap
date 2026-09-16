@@ -125,58 +125,58 @@ function paginationUrl(int $p): string {
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-3xl border border-teal-100 shadow-card-custom overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+    <div class="bg-white rounded-3xl border border-teal-100 shadow-card-custom overflow-hidden p-5 sm:p-6">
+        <div class="overflow-x-auto rounded-2xl border border-gray-100">
+            <table class="w-full min-w-[1080px] text-left text-xs font-sans">
                 <thead>
-                    <tr class="bg-teal-50/50 border-b border-teal-100 text-gray-400 uppercase tracking-wider font-extrabold">
-                        <th class="py-4 px-4 w-12 text-center">No</th>
-                        <th class="py-4 px-4">Nama Tenaga Kerja</th>
-                        <th class="py-4 px-4">NIK &amp; Usia</th>
-                        <th class="py-4 px-4">Unit Layanan</th>
-                        <th class="py-4 px-4">Jabatan Terakhir</th>
-                        <th class="py-4 px-4">Status &amp; Skema</th>
-                        <th class="py-4 px-4">Sertifikat</th>
-                        <th class="py-4 px-4 text-center">Aksi</th>
+                    <tr class="bg-teal-50/70 border-b border-teal-100 text-gray-500 uppercase tracking-wider text-[10px] font-extrabold">
+                        <th class="py-3 px-3 sm:px-4 w-12 text-center">No</th>
+                        <th class="py-3 px-3 sm:px-4">Nama Tenaga Kerja</th>
+                        <th class="py-3 px-3 sm:px-4">NIK &amp; Usia</th>
+                        <th class="py-3 px-3 sm:px-4">Unit Layanan</th>
+                        <th class="py-3 px-3 sm:px-4 w-[190px] max-w-[190px]">Jabatan Terakhir</th>
+                        <th class="py-3 px-3 sm:px-4">Status &amp; Skema</th>
+                        <th class="py-3 px-3 sm:px-4">Sertifikat</th>
+                        <th class="py-3 px-3 sm:px-4 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 font-medium">
+                <tbody class="divide-y divide-gray-100 font-medium text-gray-700">
                     <?php if (empty($workers)): ?>
                         <tr><td colspan="8" class="py-12 text-center text-gray-400 font-bold">Tidak ada data tenaga kerja yang sesuai filter.</td></tr>
                     <?php else:
                         $rowNo = $offset + 1;
                         foreach ($workers as $row): ?>
-                        <tr class="hover:bg-teal-50/40 transition-colors">
-                            <td class="py-4 px-4 text-center font-bold text-gray-400"><?= $rowNo++ ?></td>
-                            <td class="py-4 px-4">
+                        <tr class="hover:bg-teal-50/40 transition-colors align-top">
+                            <td class="py-3.5 px-3 sm:px-4 text-center font-bold text-gray-400"><?= $rowNo++ ?></td>
+                            <td class="py-3.5 px-3 sm:px-4">
                                 <div class="font-black text-gray-900 text-sm"><?= h($row['nama']) ?></div>
                                 <div class="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
                                     <i data-lucide="phone" class="w-3 h-3"></i>
                                     <span><?= h($row['no_telepon'] ?: '-') ?></span>
                                 </div>
                             </td>
-                            <td class="py-4 px-4">
+                            <td class="py-3.5 px-3 sm:px-4">
                                 <div class="font-extrabold text-gray-700 tracking-wide"><?= h($row['nik'] ?: '-') ?></div>
                                 <div class="text-[11px] text-primary font-bold mt-0.5"><?= h($row['usia']) ?></div>
                             </td>
-                            <td class="py-4 px-4"><span class="font-bold text-gray-800"><?= h($row['unit_nama'] ?: $row['unit']) ?></span></td>
-                            <td class="py-4 px-4">
-                                <div class="font-bold text-gray-800"><?= h($row['jabatan_terakhir'] ?: '-') ?></div>
-                                <div class="text-[11px] text-gray-400"><?= h($row['fungsi_pekerjaan'] ?: '-') ?></div>
+                            <td class="py-3.5 px-3 sm:px-4"><span class="font-bold text-gray-800"><?= h($row['unit_nama'] ?: $row['unit'] ?: '-') ?></span></td>
+                            <td class="py-3.5 px-3 sm:px-4 w-[190px] max-w-[190px]">
+                                <div class="font-bold text-gray-800 whitespace-normal break-words leading-snug"><?= h($row['jabatan_terakhir'] ?: '-') ?></div>
+                                <div class="text-[11px] text-gray-400 whitespace-normal break-words leading-snug"><?= h($row['fungsi_pekerjaan'] ?: '-') ?></div>
                             </td>
-                            <td class="py-4 px-4">
+                            <td class="py-3.5 px-3 sm:px-4">
                                 <div class="inline-block px-2.5 py-1 rounded-full text-[10px] font-black <?= $row['status_tenaga_kerja'] === 'PKWTT' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-rose-100 text-rose-800 border border-rose-300' ?>">
                                     <?= h($row['status_tenaga_kerja']) ?>
                                 </div>
                                 <div class="text-[10px] text-gray-400 mt-1 font-bold"><?= h($row['skema_tenaga_kerja']) ?></div>
                             </td>
-                            <td class="py-4 px-4">
+                            <td class="py-3.5 px-3 sm:px-4">
                                 <button onclick='openCertModal(<?= json_encode($row) ?>)' class="px-2.5 py-1 rounded-xl bg-teal-50 hover:bg-teal-100 text-primaryDark text-[11px] font-black border border-teal-200 flex items-center gap-1 transition-colors">
                                     <i data-lucide="award" class="w-3.5 h-3.5 text-primary"></i>
                                     <span><?= h($row['sertifikasi_count']) ?> File</span>
                                 </button>
                             </td>
-                            <td class="py-4 px-4 text-center">
+                            <td class="py-3.5 px-3 sm:px-4 text-center">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <button onclick='openDetailModal(<?= json_encode($row) ?>)' title="Lihat Detail" class="w-8 h-8 rounded-xl bg-gray-100 hover:bg-teal-100 text-gray-600 hover:text-primaryDark flex items-center justify-center transition-colors">
                                         <i data-lucide="eye" class="w-4 h-4"></i>

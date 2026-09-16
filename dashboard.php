@@ -153,49 +153,71 @@ include __DIR__ . '/includes/layout-sidebar.php';
     </div>
 
     <!-- Recent Workers Table -->
-    <div class="bg-white rounded-3xl p-6 border border-teal-100 shadow-card-custom">
-        <div class="flex items-center justify-between mb-6">
+    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-teal-100 shadow-card-custom">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
             <div>
                 <h2 class="text-lg font-black text-gray-900">Data Tenaga Kerja Terkini</h2>
-                <p class="text-xs text-gray-400 font-medium">Data terbaru yang tersimpan di MySQL database SIMANTAP</p>
+                <p class="text-xs text-gray-500 font-medium">5 data terbaru yang tersimpan di database SIMANTAP</p>
             </div>
-            <a href="<?= BASE_URL ?>/tenaga-kerja.php" class="text-xs font-extrabold text-primary hover:text-primaryDark flex items-center gap-1">
+            <a href="<?= BASE_URL ?>/tenaga-kerja.php" class="self-start sm:self-auto text-xs font-extrabold text-primary hover:text-primaryDark flex items-center gap-1 whitespace-nowrap">
                 <span>Buka Manajemen Tabel</span>
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </a>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-                <thead>
-                    <tr class="border-b border-gray-100 text-gray-400 uppercase tracking-wider font-extrabold">
-                        <th class="py-3 px-3">Nama &amp; NIK</th>
-                        <th class="py-3 px-3">Unit Layanan</th>
-                        <th class="py-3 px-3">Jabatan</th>
-                        <th class="py-3 px-3">Pendidikan</th>
-                        <th class="py-3 px-3">Status</th>
-                        <th class="py-3 px-3">Sertifikasi</th>
+        <div class="overflow-x-auto rounded-2xl border border-gray-100">
+            <table class="w-full min-w-[980px] table-fixed text-left text-xs font-sans">
+                <colgroup>
+                    <col class="w-[7%]">
+                    <col class="w-[15%]">
+                    <col class="w-[15%]">
+                    <col class="w-[14%]">
+                    <col class="w-[19%]">
+                    <col class="w-[15%]">
+                    <col class="w-[15%]">
+                </colgroup>
+                <thead class="bg-teal-50/70">
+                    <tr class="border-b border-teal-100 text-gray-500 uppercase tracking-wider text-[10px] font-extrabold">
+                        <th class="py-3 px-4 text-center">No</th>
+                        <th class="py-3 px-4">Nama Tenaga Kerja</th>
+                        <th class="py-3 px-4">NIK &amp; Usia</th>
+                        <th class="py-3 px-4">Unit Layanan</th>
+                        <th class="py-3 px-4">Jabatan Terakhir</th>
+                        <th class="py-3 px-4">Status &amp; Skema</th>
+                        <th class="py-3 px-4">Sertifikat</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 font-medium">
+                <tbody class="divide-y divide-gray-100 font-medium text-gray-700">
                     <?php if (empty($recentWorkers)): ?>
-                        <tr><td colspan="6" class="py-8 text-center text-gray-400 font-medium">Belum ada data. Silakan tambahkan tenaga kerja.</td></tr>
-                    <?php else: foreach ($recentWorkers as $w): ?>
-                        <tr class="hover:bg-teal-50/40 transition-colors">
-                            <td class="py-3.5 px-3">
-                                <div class="font-extrabold text-gray-900"><?= h($w['nama']) ?></div>
-                                <div class="text-[11px] text-gray-400">NIK: <?= h($w['nik'] ?: '-') ?></div>
+                        <tr><td colspan="7" class="py-10 text-center text-gray-500 font-medium">Belum ada data. Silakan tambahkan tenaga kerja.</td></tr>
+                    <?php else: foreach ($recentWorkers as $index => $w): ?>
+                        <tr class="hover:bg-teal-50/40 transition-colors align-top">
+                            <td class="py-3.5 px-4 text-center font-bold text-gray-400"><?= $index + 1 ?></td>
+                            <td class="py-3.5 px-4 overflow-hidden">
+                                <div class="font-black text-gray-900 text-sm whitespace-normal break-words leading-snug"><?= h($w['nama']) ?></div>
+                                <div class="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5 whitespace-normal break-words leading-snug">
+                                    <i data-lucide="phone" class="w-3 h-3"></i>
+                                    <span><?= h($w['no_telepon'] ?: '-') ?></span>
+                                </div>
                             </td>
-                            <td class="py-3.5 px-3 font-bold text-gray-700"><?= h($w['unit_nama'] ?: $w['unit']) ?></td>
-                            <td class="py-3.5 px-3 text-gray-600"><?= h($w['jabatan_terakhir'] ?: '-') ?></td>
-                            <td class="py-3.5 px-3 text-gray-600"><?= h($w['pendidikan_terakhir'] ?: '-') ?> <?= $w['jurusan'] ? '(' . h($w['jurusan']) . ')' : '' ?></td>
-                            <td class="py-3.5 px-3">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black <?= $w['status_tenaga_kerja'] === 'PKWTT' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800' ?>">
+                            <td class="py-3.5 px-4 overflow-hidden">
+                                <div class="font-extrabold text-gray-700 tracking-wide whitespace-normal break-all leading-snug"><?= h($w['nik'] ?: '-') ?></div>
+                                <div class="text-[11px] text-primary font-bold mt-0.5 whitespace-normal break-words leading-snug"><?= h(hitung_usia($w['tanggal_lahir'])) ?></div>
+                            </td>
+                            <td class="py-3.5 px-4 font-bold text-gray-800 whitespace-normal break-words leading-snug overflow-hidden"><?= h($w['unit_nama'] ?: $w['unit'] ?: '-') ?></td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-gray-800 whitespace-normal break-words leading-snug"><?= h($w['jabatan_terakhir'] ?: '-') ?></div>
+                                <div class="text-[11px] text-gray-400 whitespace-normal break-words leading-snug"><?= h($w['fungsi_pekerjaan'] ?: '-') ?></div>
+                            </td>
+                            <td class="py-3.5 px-4">
+                                <span class="inline-block px-2.5 py-1 rounded-full text-[10px] font-black <?= $w['status_tenaga_kerja'] === 'PKWTT' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-rose-100 text-rose-800 border border-rose-300' ?>">
                                     <?= h($w['status_tenaga_kerja']) ?>
                                 </span>
+                                <div class="text-[10px] text-gray-400 mt-1 font-bold whitespace-normal break-words leading-snug"><?= h($w['skema_tenaga_kerja'] ?: '-') ?></div>
                             </td>
-                            <td class="py-3.5 px-3">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-                                    <?= h($w['sertifikasi_count']) ?> Sertifikat
+                            <td class="py-3.5 px-4">
+                                <span class="inline-flex px-2.5 py-1 rounded-xl bg-teal-50 text-primaryDark text-[11px] font-black border border-teal-200 items-center gap-1 whitespace-nowrap">
+                                    <i data-lucide="award" class="w-3.5 h-3.5 text-primary"></i>
+                                    <?= h($w['sertifikasi_count']) ?> File
                                 </span>
                             </td>
                         </tr>
