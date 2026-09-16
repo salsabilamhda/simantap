@@ -314,6 +314,16 @@ function paginationUrl(int $p): string {
     </div>
 </div>
 
+<!-- MODAL: Preview Gambar Sertifikat -->
+<div id="certificate-image-modal" class="fixed inset-0 z-[60] bg-black/75 flex items-center justify-center p-4 hidden" onclick="closeCertificateImage(event)">
+    <div class="relative max-w-4xl max-h-[90vh]" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeCertificateImage()" title="Tutup gambar" class="absolute -right-3 -top-3 z-10 w-9 h-9 rounded-full bg-white text-gray-600 hover:text-gray-900 flex items-center justify-center shadow-lg">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <img id="certificate-image-preview" src="" alt="Gambar sertifikat" class="block max-w-full max-h-[85vh] rounded-xl shadow-2xl bg-white object-contain">
+    </div>
+</div>
+
 <!-- ============================================================ -->
 <!-- MODAL: Import Tenaga Kerja via Excel -->
 <!-- ============================================================ -->
@@ -416,6 +426,16 @@ function openEditModal(w) {
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
 function closeCertModal() { document.getElementById('cert-modal').classList.add('hidden'); }
+function openCertificateImage(url) {
+    document.getElementById('certificate-image-preview').src = url;
+    document.getElementById('certificate-image-modal').classList.remove('hidden');
+    lucide.createIcons();
+}
+function closeCertificateImage(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('certificate-image-modal').classList.add('hidden');
+    document.getElementById('certificate-image-preview').src = '';
+}
 
 function openImportModal() {
     document.getElementById('import-modal').classList.remove('hidden');
@@ -460,7 +480,7 @@ function openCertModal(w) {
                 <div>
                     <div class="font-bold text-gray-900 text-xs">${c.judul_sertifikasi}</div>
                     <div class="text-[11px] text-gray-400">No: ${c.nomor_sertifikat || '-'}</div>
-                    ${c.gambar_sertifikat_url ? `<a href="${c.gambar_sertifikat_url}" target="_blank" class="text-primary text-[11px] font-bold underline">Lihat Gambar</a>` : ''}
+                    ${c.gambar_sertifikat_url ? `<button type="button" onclick='openCertificateImage(${JSON.stringify(c.gambar_sertifikat_url)})' class="text-primary text-[11px] font-bold underline">Lihat Gambar</button>` : ''}
                 </div>
                 <form method="POST" action="<?= BASE_URL ?>/actions/sertifikasi-delete.php">
                     <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
