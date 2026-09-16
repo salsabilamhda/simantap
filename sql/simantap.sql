@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `sertifikasis` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tenaga_kerja_id` INT UNSIGNED NOT NULL,
   `nomor_sertifikat` VARCHAR(150) DEFAULT NULL,
-  `judul_sertifikasi` VARCHAR(255) NOT NULL,
+  `judul_sertifikasi` VARCHAR(255) DEFAULT NULL,
   `gambar_sertifikat_url` VARCHAR(500) DEFAULT NULL,
   `tanggal_terbit` DATE DEFAULT NULL,
   `tanggal_kadaluarsa` DATE DEFAULT NULL,
