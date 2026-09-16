@@ -53,9 +53,6 @@ function nav_active(string $page): string {
                     <div class="flex items-center gap-3"><i data-lucide="users" class="w-4 h-4"></i><span>Data Tenaga Kerja</span></div>
                     <span class="px-2 py-0.5 rounded-full text-xs font-black <?= $currentPage === 'tenaga-kerja.php' ? 'bg-accentGold text-gray-900' : 'bg-amber-100 text-amber-800' ?>"><?= h($tkCount) ?></span>
                 </a>
-                <a href="<?= BASE_URL ?>/import-export.php" class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-bold transition-all <?= nav_active('import-export.php') ?>">
-                    <div class="flex items-center gap-3"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span>Impor &amp; Ekspor Excel</span></div>
-                </a>
             </div>
         </div>
 

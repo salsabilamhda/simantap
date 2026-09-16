@@ -51,8 +51,8 @@ include __DIR__ . '/includes/layout-sidebar.php';
                 <a href="<?= BASE_URL ?>/tenaga-kerja.php?tambah=1" class="btn-gold-primary px-5 py-3 text-xs uppercase tracking-wider gap-2 flex-1 md:flex-initial justify-center">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i><span>Tambah Tenaga Kerja</span>
                 </a>
-                <a href="<?= BASE_URL ?>/import-export.php" class="btn-teal-outline px-5 py-3 text-xs uppercase tracking-wider gap-2 flex-1 md:flex-initial justify-center">
-                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span>Impor / Ekspor</span>
+                <a href="<?= BASE_URL ?>/tenaga-kerja.php" class="btn-teal-outline px-5 py-3 text-xs uppercase tracking-wider gap-2 flex-1 md:flex-initial justify-center">
+                    <i data-lucide="users" class="w-4 h-4"></i><span>Data Tenaga Kerja</span>
                 </a>
             </div>
         </div>

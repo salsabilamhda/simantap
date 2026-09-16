@@ -81,17 +81,16 @@ simantap/
 ├─ actions/                 # proses simpan, update, hapus data
 ├─ includes/                # layout header/sidebar/footer dan form reusable
 ├─ sql/                     # file backup/schema MySQL
-├─ assets/sertifikat/       # folder file sertifikat
+├─ uploads/                 # folder file sertifikat
 ├─ config.php               # konfigurasi database dan base URL
 ├─ db.php                   # helper koneksi PDO dan query database
 ├─ dashboard.php            # halaman dashboard utama
 ├─ index.php                # redirect ke dashboard
-├─ tenaga-kerja.php         # halaman data tenaga kerja
+├─ tenaga-kerja.php         # halaman data tenaga kerja (termasuk modal import Excel & tombol ekspor)
 ├─ master-data-unit.php     # master unit layanan
 ├─ master-data-perusahaan.php # master perusahaan mitra
-├─ import-export.php        # halaman ekspor/import data
 ├─ pengaturan-admin.php     # pengaturan admin
-├─ export.php               # ekspor data ke file
+├─ export.php               # endpoint unduh data tenaga kerja (CSV/Excel)
 ├─ README.md                # dokumentasi proyek
 └─ .
 ```

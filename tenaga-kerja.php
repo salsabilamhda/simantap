@@ -73,12 +73,15 @@ function paginationUrl(int $p): string {
             <h1 class="text-2xl font-black text-gray-900 tracking-tight">Data Tenaga Kerja</h1>
             <p class="text-xs text-gray-400 font-medium">Kelola dan pantau seluruh data personil outsourcing &amp; mitra (PHP Native + MySQL)</p>
         </div>
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-            <button onclick="openAddModal()" class="btn-gold-primary px-5 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer w-full sm:w-auto justify-center">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i><span>Tambah Tenaga Kerja</span>
+        <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+            <button onclick="openAddModal()" class="btn-gold-primary px-4 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer flex-1 sm:flex-initial justify-center shadow-xs">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i><span>Tambah Data</span>
             </button>
-            <a href="<?= BASE_URL ?>/export.php" class="btn-teal-outline px-4 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer">
-                <i data-lucide="download" class="w-4 h-4"></i><span class="hidden sm:inline">Ekspor CSV</span>
+            <button onclick="openImportModal()" class="btn-teal-outline px-4 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer flex-1 sm:flex-initial justify-center bg-white shadow-xs hover:bg-teal-50">
+                <i data-lucide="file-up" class="w-4 h-4 text-teal-600"></i><span>Import Excel</span>
+            </button>
+            <a href="<?= BASE_URL ?>/export.php" class="btn-teal-outline px-4 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer flex-1 sm:flex-initial justify-center bg-white shadow-xs hover:bg-teal-50" title="Unduh data tenaga kerja (CSV/Excel)">
+                <i data-lucide="download" class="w-4 h-4 text-teal-600"></i><span>Ekspor Data</span>
             </a>
         </div>
     </div>
@@ -311,12 +314,116 @@ function paginationUrl(int $p): string {
     </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- MODAL: Import Tenaga Kerja via Excel -->
+<!-- ============================================================ -->
+<div id="import-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <!-- Header -->
+        <div class="p-6 border-b border-teal-100 flex items-center justify-between bg-gradient-to-r from-teal-50/70 to-teal-50/20">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-teal-100/80 text-primaryDark flex items-center justify-center">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black text-gray-900">Import Data Tenaga Kerja via Excel</h3>
+                    <p class="text-xs text-gray-400 font-medium">Unggah file .xlsx atau .xls untuk menambah banyak data sekaligus</p>
+                </div>
+            </div>
+            <button onclick="closeImportModal()" class="w-8 h-8 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-5">
+            <!-- Step Guide & Download Template Banner -->
+            <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+                    <div class="text-xs text-amber-900 leading-relaxed">
+                        <span class="font-black">Petunjuk Import:</span> Gunakan format kolom template resmi. Kolom <strong>UNIT LAYANAN</strong> harus cocok dengan master data unit layanan. Tanggal lahir &amp; tanggal masuk kerja diformat <code>DD/MM/YYYY</code> atau tanggal Excel standar.
+                    </div>
+                </div>
+                <button type="button" id="download-template" class="btn-gold-primary px-4 py-2 text-xs uppercase tracking-wider gap-2 shrink-0 justify-center">
+                    <i data-lucide="file-down" class="w-4 h-4"></i><span>Unduh Template</span>
+                </button>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="border-2 border-dashed border-teal-200 hover:border-primary rounded-3xl p-6 bg-teal-50/20 text-center transition-colors">
+                <div class="mx-auto w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-3">
+                    <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                </div>
+                <label for="excel-file" class="cursor-pointer">
+                    <span class="text-sm font-black text-primaryDark hover:underline">Pilih file spreadsheet (.xlsx / .xls)</span>
+                    <p class="text-[11px] text-gray-400 mt-1">Klik untuk memilih file Excel dari perangkat Anda</p>
+                </label>
+                <input id="excel-file" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" class="hidden">
+                <div id="file-chosen-name" class="mt-2 text-xs font-black text-teal-800 hidden"></div>
+            </div>
+
+            <!-- Status / Alert Box -->
+            <div id="import-message" class="hidden rounded-2xl px-4 py-3 text-xs font-bold"></div>
+
+            <!-- Preview Table -->
+            <div id="preview-wrap" class="hidden space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black text-gray-800">Preview Data Excel</span>
+                        <span id="preview-count" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-800"></span>
+                    </div>
+                    <span class="text-[11px] text-gray-400 font-medium">Menampilkan hingga 20 baris pertama</span>
+                </div>
+                <div class="overflow-x-auto max-h-60 rounded-2xl border border-teal-100 shadow-xs">
+                    <table class="w-full text-[11px] text-left" id="preview-table">
+                        <thead class="bg-teal-50 text-gray-600 font-bold sticky top-0"></thead>
+                        <tbody class="divide-y divide-gray-100 bg-white font-medium"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 sm:p-6 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between gap-3">
+            <button type="button" onclick="closeImportModal()" class="px-5 py-2.5 rounded-full border border-gray-300 text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors">Tutup</button>
+            <button type="button" id="process-import" disabled class="btn-gold-primary py-2.5 px-6 text-xs uppercase tracking-wider gap-2 justify-center disabled:opacity-40 disabled:cursor-not-allowed">
+                <i data-lucide="database" class="w-4 h-4"></i><span>Proses Simpan ke Database</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // --- Modal helpers ---
 function openAddModal() { document.getElementById('add-modal').classList.remove('hidden'); }
 function closeAddModal() { document.getElementById('add-modal').classList.add('hidden'); }
+function openEditModal(w) {
+    document.getElementById('edit-id').value = w.id;
+    document.getElementById('edit-subtitle').innerText = 'ID: ' + w.id + ' — ' + w.nama;
+    const f = document.getElementById('edit-form');
+    const fields = ['nama','nik','nomor_perjanjian','nama_perusahaan','tempat_lahir','tanggal_lahir',
+        'pendidikan_terakhir','jurusan','no_telepon','email','jenis_kelamin','alamat_domisili',
+        'kota_kabupaten','provinsi','jabatan_terakhir','fungsi_pekerjaan','unit','unit_layanan_id',
+        'nomor_bpjs_kesehatan','nomor_bpjs_ketenagakerjaan','nomor_dplk','bank_dplk',
+        'no_perjanjian_kerja','tanggal_masuk_kerja','status_tenaga_kerja','skema_tenaga_kerja'];
+    fields.forEach(name => {
+        const el = f.querySelector('[name="' + name + '"]');
+        if (el && w[name] != null) el.value = w[name];
+    });
+    document.getElementById('edit-modal').classList.remove('hidden');
+}
 function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
 function closeCertModal() { document.getElementById('cert-modal').classList.add('hidden'); }
+
+function openImportModal() {
+    document.getElementById('import-modal').classList.remove('hidden');
+    lucide.createIcons();
+}
+function closeImportModal() {
+    document.getElementById('import-modal').classList.add('hidden');
+}
 
 function openDetailModal(w) {
     document.getElementById('detail-nama').innerText = w.nama;
@@ -344,23 +451,6 @@ function openDetailModal(w) {
     lucide.createIcons();
 }
 
-function openEditModal(w) {
-    document.getElementById('edit-id').value = w.id;
-    document.getElementById('edit-subtitle').innerText = 'ID: ' + w.id + ' — ' + w.nama;
-    // Fill all fields
-    const f = document.getElementById('edit-form');
-    const fields = ['nama','nik','nomor_perjanjian','nama_perusahaan','tempat_lahir','tanggal_lahir',
-        'pendidikan_terakhir','jurusan','no_telepon','email','jenis_kelamin','alamat_domisili',
-        'kota_kabupaten','provinsi','jabatan_terakhir','fungsi_pekerjaan','unit','unit_layanan_id',
-        'nomor_bpjs_kesehatan','nomor_bpjs_ketenagakerjaan','nomor_dplk','bank_dplk',
-        'no_perjanjian_kerja','tanggal_masuk_kerja','status_tenaga_kerja','skema_tenaga_kerja'];
-    fields.forEach(name => {
-        const el = f.querySelector('[name="' + name + '"]');
-        if (el && w[name] != null) el.value = w[name];
-    });
-    document.getElementById('edit-modal').classList.remove('hidden');
-}
-
 function openCertModal(w) {
     document.getElementById('cert-worker-name').innerText = w.nama;
     document.getElementById('cert-tk-id').value = w.id;
@@ -386,7 +476,108 @@ function openCertModal(w) {
     lucide.createIcons();
 }
 
-if (new URLSearchParams(window.location.search).get('tambah') === '1') openAddModal();
+// --- Import Excel via SheetJS ---
+const importCsrf = <?= json_encode(csrf_token()) ?>;
+const importHeaders = ['NO', 'NOMOR PERJANJIAN', 'NAMA PERUSAHAAN', 'NAMA', 'NIK', 'TEMPAT LAHIR', 'TANGGAL TAHUN LAHIR', 'NO TELEPON (WA)', 'EMAIL', 'JENIS KELAMIN', 'ALAMAT DOMISILI', 'KOTA/KABUPATEN', 'PROVINSI', 'JABATAN TERAKHIR', 'FUNGSI PEKERJAAN', 'UNIT', 'UNIT LAYANAN', 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)', 'JUDUL SERTIFIKASI', 'NOMOR BPJS KESEHATAN', 'NOMOR BPJS KETENAGAKERJAAN', 'NOMOR DPLK', 'BANK DPLK', 'NOMOR PERJANJIAN KERJA PKWT/PKWTT', 'TANGGAL MASUK KERJA', 'STATUS TENAGA KERJA (PKWT/PKWTT)', 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)'];
+const optionalImportHeaders = new Set(['NO TELEPON (WA)', 'FUNGSI PEKERJAAN', 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)', 'JUDUL SERTIFIKASI', 'NOMOR BPJS KESEHATAN', 'NOMOR BPJS KETENAGAKERJAAN']);
+let importRows = [];
+
+function importMessage(text, success = false) {
+    const box = document.getElementById('import-message');
+    box.textContent = text;
+    box.className = `rounded-2xl px-4 py-3 text-xs font-bold ${success ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-rose-50 border border-rose-200 text-rose-800'}`;
+}
+
+function renderImportPreview(rows) {
+    importRows = rows;
+    const visibleHeaders = importHeaders.slice(0, 8);
+    document.querySelector('#preview-table thead').innerHTML = `<tr>${visibleHeaders.map((header) => `<th class="px-3 py-2 whitespace-nowrap">${header}</th>`).join('')}</tr>`;
+    document.querySelector('#preview-table tbody').innerHTML = rows.slice(0, 20).map((row) => `<tr>${visibleHeaders.map((header) => `<td class="px-3 py-1.5 whitespace-nowrap">${String(row[header] ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]))}</td>`).join('')}</tr>`).join('');
+    document.getElementById('preview-wrap').classList.toggle('hidden', rows.length === 0);
+    document.getElementById('preview-count').textContent = `${rows.length} baris`;
+    document.getElementById('process-import').disabled = rows.length === 0;
+}
+
+document.getElementById('download-template').addEventListener('click', () => {
+    const workbook = XLSX.utils.book_new();
+    const sheet = XLSX.utils.aoa_to_sheet([importHeaders, ['01', '1211/PJ/2024', 'PT CONTOH', 'CONTOH NAMA', '3500000000000001', 'PONOROGO', '17/06/1982', '081234567890', 'contoh@email.com', 'LAKI', 'ALAMAT CONTOH', 'PONOROGO', 'JAWA TIMUR', 'JABATAN CONTOH', 'UP3 PONOROGO', 'UP3 Ponorogo', 'SERT-001', 'Sertifikasi Wajib', '0000000001', '0000000002', '0000000003', 'BNI', 'PKWT-001', '01/01/2025', 'PKWT', 'PEMBORONGAN']]);
+    XLSX.utils.book_append_sheet(workbook, sheet, 'Tenaga Kerja');
+    XLSX.writeFile(workbook, 'template-import-tenaga-kerja.xlsx');
+});
+
+document.getElementById('excel-file').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    const nameBadge = document.getElementById('file-chosen-name');
+    nameBadge.textContent = 'File: ' + file.name;
+    nameBadge.classList.remove('hidden');
+
+    const reader = new FileReader();
+    reader.onload = (loadEvent) => {
+        try {
+            const workbook = XLSX.read(loadEvent.target.result, {type: 'array', cellDates: true});
+            const headerAliases = {
+                'SKEMA TENAGA KERJA (PEMBORONGAN / VOLUME BASED)': 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)',
+            };
+            const normalizeHeader = (key) => {
+                const normalizedKey = String(key).replace(/^\uFEFF/, '').trim().toUpperCase();
+                return headerAliases[normalizedKey] || normalizedKey;
+            };
+            const selectedSheet = workbook.SheetNames.map((sheetName) => {
+                const sheet = workbook.Sheets[sheetName];
+                const previewRows = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: '', raw: false});
+                const headerRow = previewRows.findIndex((row) => {
+                    const headers = row.map(normalizeHeader);
+                    return importHeaders.filter((header) => headers.includes(header)).length >= 3;
+                });
+                return {sheet, headerRow};
+            }).find(({headerRow}) => headerRow >= 0);
+            if (!selectedSheet) throw new Error('Tidak ditemukan sheet Excel yang berisi header data tenaga kerja.');
+            const rows = XLSX.utils.sheet_to_json(selectedSheet.sheet, {defval: '', raw: false, range: selectedSheet.headerRow});
+            const normalizedRows = rows.map((row) => Object.fromEntries(Object.entries(row).map(([key, value]) => [normalizeHeader(key), String(value).replace(/^'/, '').trim()]))).filter((row) => Object.values(row).some(Boolean));
+            const missingHeaders = importHeaders.filter((header) => !optionalImportHeaders.has(header) && !Object.keys(normalizedRows[0] || {}).includes(header));
+            if (missingHeaders.length) throw new Error(`Kolom wajib belum ada: ${missingHeaders.join(', ')}`);
+            renderImportPreview(normalizedRows);
+            importMessage(`${normalizedRows.length} baris siap diproses. Periksa preview terlebih dahulu sebelum menyimpan.`, true);
+        } catch (error) {
+            renderImportPreview([]);
+            importMessage(error.message || 'File Excel tidak dapat dibaca.', false);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('process-import').addEventListener('click', async () => {
+    const button = document.getElementById('process-import');
+    button.disabled = true;
+    button.querySelector('span').textContent = 'Memproses...';
+    try {
+        const response = await fetch('actions/import-excel.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRF-Token': importCsrf},
+            body: JSON.stringify({rows: importRows})
+        });
+        const result = await response.json();
+        importMessage(result.message, response.ok && result.success);
+        if (response.ok && result.success) {
+            renderImportPreview([]);
+            document.getElementById('excel-file').value = '';
+            document.getElementById('file-chosen-name').classList.add('hidden');
+            setTimeout(() => {
+                window.location.href = '<?= BASE_URL ?>/tenaga-kerja.php';
+            }, 1200);
+        }
+    } catch (error) {
+        importMessage('Server tidak dapat dihubungi.', false);
+    } finally {
+        button.disabled = importRows.length === 0;
+        button.querySelector('span').textContent = 'Proses Simpan ke Database';
+    }
+});
+
+// Auto-open modal tambah jika ada parameter ?tambah=1
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('tambah') === '1') openAddModal();
 </script>
 
 <?php include __DIR__ . '/includes/layout-footer.php'; ?>
