@@ -28,6 +28,11 @@ $recentWorkers = db_query("
     LIMIT 5
 ");
 
+$totalSertifikasi = (int) db_val("SELECT COUNT(*) FROM sertifikasis");
+$totalPemborongan = (int) db_val("SELECT COUNT(*) FROM tenaga_kerjas WHERE skema_tenaga_kerja LIKE '%PEMBORONGAN%'");
+$totalVolumeBased = (int) db_val("SELECT COUNT(*) FROM tenaga_kerjas WHERE skema_tenaga_kerja LIKE '%VOLUME%' OR skema_tenaga_kerja LIKE '%VENDOR%'");
+$mitraUtama       = db_val("SELECT nama_perusahaan FROM tenaga_kerjas WHERE nama_perusahaan IS NOT NULL AND nama_perusahaan != '' GROUP BY nama_perusahaan ORDER BY COUNT(*) DESC LIMIT 1") ?: 'PT ANUGERAH PUTRA PERMANA';
+
 include __DIR__ . '/includes/layout-head.php';
 include __DIR__ . '/includes/layout-sidebar.php';
 ?>
@@ -143,6 +148,94 @@ include __DIR__ . '/includes/layout-sidebar.php';
                     </div>
                 </div>
                 <?php endforeach; ?>
+            </div>
+        </div>
+
+        <!-- Operational Summary & Quick Access (Column 3) -->
+        <div class="bg-white rounded-3xl p-6 border border-teal-100 shadow-card-custom flex flex-col justify-between space-y-5">
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-lg font-black text-gray-900">Ringkasan Operasional</h2>
+                        <p class="text-xs text-gray-400 font-medium">Skema kerja &amp; kepatuhan berkas</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-2xl bg-teal-50 text-primary flex items-center justify-center">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+                <!-- Mitra Info -->
+                <div class="p-3 rounded-2xl bg-teal-50/40 border border-teal-100/80 mb-4">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Perusahaan Mitra Utama</div>
+                    <div class="text-xs font-black text-gray-900 mt-0.5 truncate flex items-center gap-1.5" title="<?= h($mitraUtama) ?>">
+                        <i data-lucide="building-2" class="w-3.5 h-3.5 text-primary shrink-0"></i>
+                        <span class="truncate"><?= h($mitraUtama) ?></span>
+                    </div>
+                </div>
+
+                <!-- Skema Tenaga Kerja Progress -->
+                <div class="space-y-3">
+                    <div class="text-[11px] font-extrabold text-gray-400 uppercase tracking-wider">Komposisi Skema Kerja</div>
+                    
+                    <?php
+                        $pctPemborongan = $totalTenagaKerja > 0 ? round(($totalPemborongan / $totalTenagaKerja) * 100, 1) : 0;
+                        $pctVolume      = $totalTenagaKerja > 0 ? round(($totalVolumeBased / $totalTenagaKerja) * 100, 1) : 0;
+                    ?>
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-bold mb-1">
+                            <span class="text-gray-700 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                <span>Pemborongan</span>
+                            </span>
+                            <span class="text-gray-900 font-black"><?= h($totalPemborongan) ?> <span class="text-gray-400 font-normal">(<?= $pctPemborongan ?>%)</span></span>
+                        </div>
+                        <div class="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: <?= $pctPemborongan ?>%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between text-xs font-bold mb-1">
+                            <span class="text-gray-700 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                <span>Volume Based</span>
+                            </span>
+                            <span class="text-gray-900 font-black"><?= h($totalVolumeBased) ?> <span class="text-gray-400 font-normal">(<?= $pctVolume ?>%)</span></span>
+                        </div>
+                        <div class="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width: <?= $pctVolume ?>%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sertifikat Info Mini Card -->
+                <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <i data-lucide="award" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-black text-gray-900"><?= h($totalSertifikasi) ?> Sertifikat</div>
+                            <div class="text-[10px] text-gray-400 font-medium">Terverifikasi di sistem</div>
+                        </div>
+                    </div>
+                    <a href="<?= BASE_URL ?>/tenaga-kerja.php" class="text-[11px] font-bold text-primary hover:underline">Kelola</a>
+                </div>
+            </div>
+
+            <!-- Quick Action Links -->
+            <div class="pt-3 border-t border-gray-100 space-y-2">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Aksi Cepat</div>
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="<?= BASE_URL ?>/export.php" class="p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 border border-gray-200 text-gray-700 hover:text-primaryDark text-xs font-bold flex items-center gap-2 transition-colors">
+                        <i data-lucide="download" class="w-4 h-4 text-teal-600"></i>
+                        <span>Ekspor Data</span>
+                    </a>
+                    <a href="<?= BASE_URL ?>/master-data-unit.php" class="p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 border border-gray-200 text-gray-700 hover:text-primaryDark text-xs font-bold flex items-center gap-2 transition-colors">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-teal-600"></i>
+                        <span>Master Unit</span>
+                    </a>
+                </div>
             </div>
         </div>
 
