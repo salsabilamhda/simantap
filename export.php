@@ -24,7 +24,7 @@ fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 // Header columns
 fputcsv($file, [
     'NO', 'NOMOR PERJANJIAN', 'NAMA PERUSAHAAN', 'NAMA', 'NIK',
-    'TEMPAT LAHIR', 'TANGGAL LAHIR', 'USIA', 'PENDIDIKAN TERAKHIR', 'JURUSAN',
+    'TEMPAT LAHIR', 'TANGGAL LAHIR', 'USIA',
     'NO TELEPON', 'EMAIL', 'JENIS KELAMIN', 'ALAMAT DOMISILI', 'KOTA KABUPATEN',
     'PROVINSI', 'JABATAN TERAKHIR', 'FUNGSI PEKERJAAN', 'UNIT', 'UNIT LAYANAN',
     'NOMOR BPJS KESEHATAN', 'NOMOR BPJS KETENAGAKERJAAN', 'NOMOR DPLK', 'BANK DPLK',
@@ -43,8 +43,6 @@ foreach ($workers as $row) {
         $row['tempat_lahir'],
         $row['tanggal_lahir'],
         hitung_usia($row['tanggal_lahir']),
-        $row['pendidikan_terakhir'],
-        $row['jurusan'],
         $row['no_telepon'],
         $row['email'],
         $row['jenis_kelamin'],

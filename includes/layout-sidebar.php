@@ -25,7 +25,6 @@ function nav_active(string $page): string {
             <div>
                 <div class="flex items-center gap-1.5">
                     <span class="text-xl font-black tracking-tight text-primaryDark">SIMANTAP</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300">v2.0</span>
                 </div>
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Data Tenaga Kerja</p>
             </div>
@@ -33,12 +32,6 @@ function nav_active(string $page): string {
         <button onclick="toggleSidebar()" class="md:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded-lg">
             <i data-lucide="x" class="w-5 h-5"></i>
         </button>
-    </div>
-
-    <!-- Unit Badge Banner -->
-    <div class="mx-4 mt-4 p-2.5 rounded-2xl bg-[#FFF8E7] border border-[#FFD23F]/50 flex items-center gap-2 text-xs font-bold text-amber-800">
-        <i data-lucide="sparkles" class="w-4 h-4 text-amber-600 shrink-0"></i>
-        <span>Wilayah UP3 &amp; 4 ULP Ponorogo</span>
     </div>
 
     <!-- Navigation Links -->

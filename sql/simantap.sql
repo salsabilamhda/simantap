@@ -52,8 +52,6 @@ CREATE TABLE IF NOT EXISTS `tenaga_kerjas` (
   `nik` VARCHAR(30) DEFAULT NULL,
   `tempat_lahir` VARCHAR(100) DEFAULT NULL,
   `tanggal_lahir` DATE DEFAULT NULL,
-  `pendidikan_terakhir` VARCHAR(20) DEFAULT NULL,
-  `jurusan` VARCHAR(150) DEFAULT NULL,
   `no_telepon` VARCHAR(30) DEFAULT NULL,
   `email` VARCHAR(190) DEFAULT NULL,
   `jenis_kelamin` VARCHAR(20) DEFAULT NULL,

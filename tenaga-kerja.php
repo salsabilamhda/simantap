@@ -79,7 +79,7 @@ function paginationUrl(int $p): string {
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-black text-gray-900 tracking-tight">Data Tenaga Kerja</h1>
-            <p class="text-xs text-gray-400 font-medium">Kelola dan pantau seluruh data personil outsourcing &amp; mitra (PHP Native + MySQL)</p>
+            <p class="text-xs text-gray-400 font-medium">Kelola dan pantau seluruh data personil outsourcing &amp; mitra</p>
         </div>
         <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
             <button onclick="openAddModal()" class="btn-gold-primary px-4 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer flex-1 sm:flex-initial justify-center shadow-xs">
@@ -463,7 +463,7 @@ function openEditModal(w) {
     document.getElementById('edit-subtitle').innerText = 'ID: ' + w.id + ' — ' + w.nama;
     const f = document.getElementById('edit-form');
     const fields = ['nama','nik','nomor_perjanjian','nama_perusahaan','tempat_lahir','tanggal_lahir',
-        'pendidikan_terakhir','jurusan','no_telepon','email','jenis_kelamin','alamat_domisili',
+        'no_telepon','email','jenis_kelamin','alamat_domisili',
         'kota_kabupaten','provinsi','jabatan_terakhir','fungsi_pekerjaan','unit','unit_layanan_id',
         'nomor_bpjs_kesehatan','nomor_bpjs_ketenagakerjaan','nomor_dplk','bank_dplk',
         'no_perjanjian_kerja','tanggal_masuk_kerja','status_tenaga_kerja','skema_tenaga_kerja'];
@@ -672,10 +672,6 @@ function openDetailModal(w) {
                 <div>
                     <span class="text-gray-400 text-[11px] block">Jenis Kelamin:</span>
                     <span class="font-bold text-gray-900">${escHtml(w.jenis_kelamin)}</span>
-                </div>
-                <div>
-                    <span class="text-gray-400 text-[11px] block">Pendidikan Terakhir:</span>
-                    <span class="font-bold text-gray-900">${escHtml(w.pendidikan_terakhir)}${w.jurusan ? ' (' + escHtml(w.jurusan) + ')' : ''}</span>
                 </div>
                 <div>
                     <span class="text-gray-400 text-[11px] block">Nomor Telepon / WhatsApp:</span>

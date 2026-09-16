@@ -91,8 +91,6 @@ try {
             import_required($row, 'NIK', $rowNumber),
             import_required($row, 'TEMPAT LAHIR', $rowNumber),
             import_date(import_required($row, 'TANGGAL TAHUN LAHIR', $rowNumber), 'TANGGAL TAHUN LAHIR', $rowNumber),
-            null,
-            null,
             import_value($row, 'NO TELEPON (WA)'),
             import_required($row, 'EMAIL', $rowNumber),
             import_required($row, 'JENIS KELAMIN', $rowNumber),
@@ -119,7 +117,7 @@ try {
         ];
     }
 
-    $columns = ['no_urut', 'nomor_perjanjian', 'nama_perusahaan', 'nama', 'nik', 'tempat_lahir', 'tanggal_lahir', 'pendidikan_terakhir', 'jurusan', 'no_telepon', 'email', 'jenis_kelamin', 'alamat_domisili', 'kota_kabupaten', 'provinsi', 'jabatan_terakhir', 'fungsi_pekerjaan', 'unit', 'unit_layanan_id', 'nomor_bpjs_kesehatan', 'nomor_bpjs_ketenagakerjaan', 'nomor_dplk', 'bank_dplk', 'no_perjanjian_kerja', 'tanggal_masuk_kerja', 'status_tenaga_kerja', 'skema_tenaga_kerja'];
+    $columns = ['no_urut', 'nomor_perjanjian', 'nama_perusahaan', 'nama', 'nik', 'tempat_lahir', 'tanggal_lahir', 'no_telepon', 'email', 'jenis_kelamin', 'alamat_domisili', 'kota_kabupaten', 'provinsi', 'jabatan_terakhir', 'fungsi_pekerjaan', 'unit', 'unit_layanan_id', 'nomor_bpjs_kesehatan', 'nomor_bpjs_ketenagakerjaan', 'nomor_dplk', 'bank_dplk', 'no_perjanjian_kerja', 'tanggal_masuk_kerja', 'status_tenaga_kerja', 'skema_tenaga_kerja'];
     $statement = db()->prepare('INSERT INTO tenaga_kerjas (`' . implode('`, `', $columns) . '`, created_at, updated_at) VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ', NOW(), NOW())');
     $certificateStatement = db()->prepare('INSERT INTO sertifikasis (tenaga_kerja_id, nomor_sertifikat, judul_sertifikasi, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())');
 

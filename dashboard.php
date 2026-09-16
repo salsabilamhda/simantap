@@ -38,10 +38,6 @@ include __DIR__ . '/includes/layout-sidebar.php';
     <div class="relative overflow-hidden bg-gradient-to-r from-white via-teal-50 to-white rounded-3xl p-6 sm:p-8 border border-teal-200 shadow-card-custom">
         <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div class="max-w-2xl">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-800 text-xs font-black mb-3">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
-                    <span>Sistem Manajemen Data Tenaga Kerja Terintegrasi (PHP Native + MySQL)</span>
-                </div>
                 <h1 class="text-2xl sm:text-4xl font-black text-primaryDark tracking-tight leading-tight">Selamat Datang di SIMANTAP</h1>
                 <p class="mt-2 text-sm text-gray-600 font-medium leading-relaxed">
                     Pusat kendali dan monitoring data tenaga kerja outsourcing/mitra di wilayah kerja 5 Unit Layanan (ULP Balong, ULP Pacitan, ULP Ponorogo, ULP Trenggalek, dan UP3 Ponorogo).

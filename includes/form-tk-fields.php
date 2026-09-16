@@ -31,20 +31,6 @@
             </select>
         </div>
         <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">Pendidikan Terakhir</label>
-            <select name="pendidikan_terakhir" class="w-full px-3.5 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs font-bold text-gray-700">
-                <option value="SMA">SMA</option>
-                <option value="SMK" selected>SMK</option>
-                <option value="D3">D3</option>
-                <option value="S1">S1</option>
-                <option value="S2">S2</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">Jurusan</label>
-            <input type="text" name="jurusan" placeholder="Contoh: TEKNIK LISTRIK" class="w-full px-3.5 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs font-medium focus:outline-none focus:border-primary">
-        </div>
-        <div>
             <label class="block text-xs font-bold text-gray-700 mb-1">No. Telepon / WhatsApp</label>
             <input type="text" name="no_telepon" placeholder="Contoh: 0812-xxxx-xxxx" class="w-full px-3.5 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs font-medium focus:outline-none focus:border-primary">
         </div>

@@ -18,7 +18,7 @@ if (!$existing) {
 
 $fields = [
     'nama', 'nik', 'nomor_perjanjian', 'nama_perusahaan', 'tempat_lahir',
-    'tanggal_lahir', 'pendidikan_terakhir', 'jurusan', 'no_telepon', 'email',
+    'tanggal_lahir', 'no_telepon', 'email',
     'jenis_kelamin', 'alamat_domisili', 'kota_kabupaten', 'provinsi',
     'jabatan_terakhir', 'fungsi_pekerjaan', 'unit', 'unit_layanan_id',
     'nomor_bpjs_kesehatan', 'nomor_bpjs_ketenagakerjaan', 'nomor_dplk', 'bank_dplk',
