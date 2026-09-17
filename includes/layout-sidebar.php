@@ -74,14 +74,40 @@ function nav_active(string $page): string {
         </div>
     </nav>
 
-    <!-- Footer Profile -->
-    <div class="p-4 border-t border-gray-100 bg-gray-50/50">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-teal-800 text-white font-black flex items-center justify-center text-sm">SA</div>
-            <div class="flex-1 min-w-0">
-                <div class="text-xs font-black text-gray-900 truncate">Super Admin</div>
-                <div class="text-[11px] text-gray-400 truncate">admin@simantap.id</div>
+    <!-- Footer Profile & Logout -->
+    <?php
+    $authUser = auth_user() ?? [
+        'name'     => 'Administrator',
+        'username' => '123456',
+        'email'    => 'admin@simantap.id',
+        'role'     => 'superadmin',
+    ];
+    $authName = $authUser['name'] ?? 'Admin';
+    $authInitials = '';
+    $parts = preg_split('/\s+/', trim($authName));
+    if (!empty($parts[0])) $authInitials .= strtoupper(substr($parts[0], 0, 1));
+    if (count($parts) > 1 && !empty($parts[1])) $authInitials .= strtoupper(substr($parts[1], 0, 1));
+    if (empty($authInitials)) $authInitials = 'AD';
+    $authRole = ($authUser['role'] ?? '') === 'superadmin' ? 'Super Admin' : 'Admin Operasional';
+    $authIdentifier = !empty($authUser['username']) ? $authUser['username'] : $authUser['email'];
+    ?>
+    <div class="p-4 border-t border-gray-100 bg-gray-50/70">
+        <div class="flex items-center justify-between gap-2.5">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-primaryDark to-primary text-white font-black flex items-center justify-center text-sm shrink-0 shadow-teal-glow">
+                    <?= h($authInitials) ?>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-xs font-black text-gray-900 truncate" title="<?= h($authName) ?>"><?= h($authName) ?></div>
+                    <div class="text-[10px] font-bold text-teal-700 truncate"><?= h($authRole) ?> &bull; <?= h($authIdentifier) ?></div>
+                </div>
             </div>
+            <button type="button"
+               onclick="openLogoutModal(event)"
+               title="Keluar / Logout"
+               class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all shrink-0 cursor-pointer">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
         </div>
     </div>
 </aside>
@@ -103,6 +129,17 @@ function nav_active(string $page): string {
             <div class="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>Database MySQL Aktif</span>
+            </div>
+            <div class="h-4 w-px bg-gray-200 hidden sm:block"></div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-gray-700 hidden md:inline"><?= h($authName) ?></span>
+                <button type="button"
+                   onclick="openLogoutModal(event)"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-rose-50 hover:text-rose-600 text-gray-600 text-xs font-bold transition-all cursor-pointer"
+                   title="Keluar dari sistem">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Keluar</span>
+                </button>
             </div>
         </div>
     </header>

@@ -61,7 +61,7 @@ function db_last_id(): string {
 // ============================================================
 
 function session_start_safe(): void {
-    if (session_status() === PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
         session_start();
     }
 }
@@ -103,6 +103,50 @@ function csrf_verify(): void {
     if (!hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
         http_response_code(403);
         die('Forbidden: Invalid CSRF token.');
+    }
+}
+
+// ============================================================
+// Helper: Autentikasi Admin & Session
+// ============================================================
+
+function auth_user(): ?array {
+    session_start_safe();
+    return $_SESSION['user'] ?? null;
+}
+
+function auth_check(): bool {
+    return auth_user() !== null;
+}
+
+function auth_login(array $user): void {
+    session_start_safe();
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
+    $_SESSION['user'] = [
+        'id'       => $user['id'],
+        'name'     => $user['name'],
+        'username' => $user['username'] ?? '',
+        'email'    => $user['email'],
+        'role'     => $user['role'] ?? 'admin',
+        'status'   => $user['status'] ?? 'Aktif',
+    ];
+}
+
+function auth_logout(): void {
+    session_start_safe();
+    unset($_SESSION['user']);
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_destroy();
+    }
+}
+
+function auth_require(): void {
+    session_start_safe();
+    if (!auth_check()) {
+        flash_set('error', 'Silakan login terlebih dahulu untuk mengakses halaman ini.');
+        redirect(BASE_URL . '/login.php');
     }
 }
 

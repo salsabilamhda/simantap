@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/db.php';
+auth_require();
 
 $fileName = 'DATA_TENAGA_KERJA_SIMANTAP_' . date('Ymd_His') . '.csv';
 $workers  = db_query("

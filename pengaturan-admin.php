@@ -101,17 +101,19 @@ include __DIR__ . '/includes/layout-sidebar.php';
         <div class="divide-y divide-gray-100" id="admin-list-container">
             <?php foreach ($admins as $admin): 
                 $adminSafe = [
-                    'id'     => $admin['id'],
-                    'name'   => $admin['name'],
-                    'email'  => $admin['email'],
-                    'role'   => $admin['role'],
-                    'status' => $admin['status'] ?? 'Aktif',
+                    'id'       => $admin['id'],
+                    'name'     => $admin['name'],
+                    'username' => $admin['username'] ?? '',
+                    'email'    => $admin['email'],
+                    'role'     => $admin['role'],
+                    'status'   => $admin['status'] ?? 'Aktif',
                 ];
                 $isSuperAdmin = ($admin['role'] === 'superadmin');
                 $isActive = (($admin['status'] ?? 'Aktif') === 'Aktif');
             ?>
             <div class="admin-item py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
                  data-name="<?= h(strtolower($admin['name'])) ?>"
+                 data-username="<?= h(strtolower($admin['username'] ?? '')) ?>"
                  data-email="<?= h(strtolower($admin['email'])) ?>"
                  data-role="<?= h($admin['role']) ?>"
                  data-status="<?= h($admin['status'] ?? 'Aktif') ?>">
@@ -129,6 +131,13 @@ include __DIR__ . '/includes/layout-sidebar.php';
                             <?php endif; ?>
                         </div>
                         <div class="text-xs text-gray-400 flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5 font-medium">
+                            <?php if (!empty($admin['username'])): ?>
+                                <span class="flex items-center gap-1 font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">
+                                    <i data-lucide="user" class="w-3 h-3 text-teal-600"></i>
+                                    <?= h($admin['username']) ?>
+                                </span>
+                                <span class="text-gray-300">•</span>
+                            <?php endif; ?>
                             <span class="flex items-center gap-1">
                                 <i data-lucide="mail" class="w-3.5 h-3.5 text-gray-400"></i>
                                 <?= h($admin['email']) ?>
@@ -215,6 +224,10 @@ include __DIR__ . '/includes/layout-sidebar.php';
                 <input type="text" name="name" required placeholder="Contoh: Budi Santoso" class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs font-medium focus:bg-white focus:outline-none focus:border-primary">
             </div>
             <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Username Login</label>
+                <input type="text" name="username" placeholder="Contoh: 123456 (kredensial username login)" class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs font-medium focus:bg-white focus:outline-none focus:border-primary">
+            </div>
+            <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">Alamat Email <span class="text-rose-500">*</span></label>
                 <input type="email" name="email" required placeholder="budi@simantap.id" class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs font-medium focus:bg-white focus:outline-none focus:border-primary">
             </div>
@@ -272,6 +285,10 @@ include __DIR__ . '/includes/layout-sidebar.php';
                 <input type="text" name="name" id="edit-admin-name" required class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs font-medium focus:bg-white focus:outline-none focus:border-primary">
             </div>
             <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Username Login</label>
+                <input type="text" name="username" id="edit-admin-username" placeholder="Contoh: 123456 (kredensial username login)" class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs font-medium focus:bg-white focus:outline-none focus:border-primary">
+            </div>
+            <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">Alamat Email <span class="text-rose-500">*</span></label>
                 <input type="email" name="email" id="edit-admin-email" required class="w-full px-3.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 text-xs font-medium focus:bg-white focus:outline-none focus:border-primary">
             </div>
@@ -324,6 +341,7 @@ function closeAddAdminModal() {
 function openEditAdminModal(admin) {
     document.getElementById('edit-admin-id').value = admin.id;
     document.getElementById('edit-admin-name').value = admin.name || '';
+    document.getElementById('edit-admin-username').value = admin.username || '';
     document.getElementById('edit-admin-email').value = admin.email || '';
     document.getElementById('edit-admin-password').value = '';
     document.getElementById('edit-admin-role').value = admin.role || 'admin';
@@ -366,11 +384,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         items.forEach(function(item) {
             const name = item.getAttribute('data-name') || '';
+            const username = item.getAttribute('data-username') || '';
             const email = item.getAttribute('data-email') || '';
             const role = item.getAttribute('data-role') || '';
             const status = item.getAttribute('data-status') || '';
 
-            const matchesQuery = !query || name.includes(query) || email.includes(query);
+            const matchesQuery = !query || name.includes(query) || username.includes(query) || email.includes(query);
             const matchesRole = !selectedRole || role === selectedRole;
             const matchesStatus = !selectedStatus || status === selectedStatus;
 

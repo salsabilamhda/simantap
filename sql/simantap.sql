@@ -10,6 +10,7 @@ USE `simantap`;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(150) NOT NULL,
+  `username` VARCHAR(100) DEFAULT NULL,
   `email` VARCHAR(190) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `role` VARCHAR(20) NOT NULL DEFAULT 'admin',
@@ -17,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_users_username` (`username`),
   UNIQUE KEY `uq_users_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -103,9 +105,24 @@ CREATE TABLE IF NOT EXISTS `sertifikasis` (
 ALTER TABLE `sertifikasis`
   MODIFY `judul_sertifikasi` VARCHAR(255) DEFAULT NULL;
 
--- Seed data awal agar aplikasi dapat langsung digunakan setelah import.
-INSERT IGNORE INTO `users` (`name`, `email`, `password`, `role`, `status`)
-VALUES ('Administrator SIMANTAP', 'admin@simantap.id', '$2y$10$4BFGZ9Eb0s8K3XuiIM5AMOf4mc.D215nuQ3vGPWDhkBp0R8zKuOf6', 'superadmin', 'Aktif');
+-- Sinkronisasi kolom username jika tabel users sudah dibuat sebelumnya di MySQL
+SET @colExists = (
+  SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'username'
+);
+SET @sqlQuery = IF(
+  @colExists = 0,
+  'ALTER TABLE `users` ADD COLUMN `username` VARCHAR(100) DEFAULT NULL AFTER `name`',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sqlQuery;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Seed data awal agar aplikasi dapat langsung digunakan setelah import (Username: 123456 | Password: 123456)
+INSERT INTO `users` (`id`, `name`, `username`, `email`, `password`, `role`, `status`)
+VALUES (1, 'Administrator SIMANTAP', '123456', 'admin@simantap.id', '$2y$10$G1D24mRp7gq6C05b8GlzoeKIn8L5ltiIKhx9zuS06OVBM7Lwm3nwW', 'superadmin', 'Aktif')
+ON DUPLICATE KEY UPDATE `username` = '123456', `password` = '$2y$10$G1D24mRp7gq6C05b8GlzoeKIn8L5ltiIKhx9zuS06OVBM7Lwm3nwW', `role` = 'superadmin', `status` = 'Aktif';
 
 INSERT IGNORE INTO `unit_layanans` (`kode`, `nama`, `unit_induk`, `color_hex`)
 VALUES

@@ -165,12 +165,13 @@ Aplikasi akan otomatis mengarahkan ke halaman dashboard setelah dibuka.
 
 ## Login default
 
-Data admin bawaan sudah disediakan di file SQL, yaitu:
+Data admin bawaan sudah disediakan di file SQL dan database, yaitu:
 
-- Email: admin@simantap.id
-- Password: admin123
+- Username: `123456`
+- Password: `123456`
+- Email alternatif: `admin@simantap.id`
 
-> Password bawaan tersebut sesuai dengan seed data yang sudah ada di database untuk kebutuhan pengujian awal.
+> Anda dapat login menggunakan Username (`123456`) maupun Email (`admin@simantap.id`) dengan password `123456`. Tersedia pula tombol praktis *Isi Otomatis Kredensial 123456* pada halaman login.
 
 ---
 

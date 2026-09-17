@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__DIR__) . '/db.php';
+auth_require();
 csrf_verify();
 
 $id = (int) post('id');
@@ -12,6 +13,13 @@ if (!$id) {
 $user = db_row("SELECT * FROM users WHERE id = ?", [$id]);
 if (!$user) {
     flash_set('error', 'Akun admin tidak ditemukan.');
+    redirect(BASE_URL . '/pengaturan-admin.php');
+}
+
+// Cegah penghapusan akun yang sedang digunakan
+$current = auth_user();
+if ($current && (int)$current['id'] === $id) {
+    flash_set('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif digunakan.');
     redirect(BASE_URL . '/pengaturan-admin.php');
 }
 
