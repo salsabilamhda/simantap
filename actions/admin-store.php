@@ -6,6 +6,7 @@ $name     = post('name');
 $email    = post('email');
 $password = post('password');
 $role     = post('role', 'admin');
+$status   = post('status', 'Aktif');
 
 if (empty($name) || empty($email) || empty($password)) {
     flash_set('error', 'Nama, email, dan password wajib diisi.');
@@ -33,11 +34,15 @@ if (!in_array($role, ['admin', 'superadmin'])) {
     $role = 'admin';
 }
 
+if (!in_array($status, ['Aktif', 'Nonaktif'])) {
+    $status = 'Aktif';
+}
+
 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
 db_exec(
-    "INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'Aktif', NOW(), NOW())",
-    [$name, $email, $hashedPassword, $role]
+    "INSERT INTO users (name, email, password, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())",
+    [$name, $email, $hashedPassword, $role, $status]
 );
 
 flash_set('success', "Akun admin $name berhasil dibuat!");

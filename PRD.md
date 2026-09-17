@@ -108,9 +108,10 @@ Data utama mencakup identitas, kontak, alamat, pendidikan, jabatan/fungsi, perus
 ### 5.6 Administrasi akun
 
 - Login menggunakan session.
-- Password disimpan dalam bentuk hash.
-- Menambah akun admin dengan nama, email, password, role, dan status.
-- Mendukung role `admin` dan `superadmin` pada data pengguna.
+- Password disimpan dalam bentuk hash bcrypt.
+- CRUD akun admin lengkap: melihat daftar, menambah akun, mengubah profil/role/status/password, serta menghapus akun.
+- Validasi format email, pencegahan duplikasi email, dan proteksi agar akun admin terakhir tidak dapat terhapus.
+- Mendukung role `admin` dan `superadmin` serta status `Aktif` dan `Nonaktif`.
 
 ## 6. Kebutuhan Fungsional
 
@@ -124,7 +125,7 @@ Data utama mencakup identitas, kontak, alamat, pendidikan, jabatan/fungsi, perus
 | FR-06 | Admin dapat mengelola unit layanan dan perusahaan mitra | Must | Berjalan |
 | FR-07 | Sistem menyediakan import Excel dengan template dan preview | Must | Berjalan |
 | FR-08 | Sistem menyediakan ekspor CSV | Must | Berjalan |
-| FR-09 | Super Admin dapat menambah akun admin | Should | Berjalan |
+| FR-09 | Super Admin dapat mengelola CRUD akun admin | Should | Berjalan |
 | FR-10 | Sistem mencatat audit trail perubahan data | Should | Belum tersedia |
 | FR-11 | Sistem memberikan peringatan sertifikat yang akan kadaluarsa | Should | Belum tersedia |
 | FR-12 | Sistem menyediakan backup dan pemulihan database terjadwal | Should | Belum tersedia |

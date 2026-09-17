@@ -4,6 +4,7 @@
 // Lalu di akhir halaman include layout-footer.php
 $tkCount = db_val("SELECT COUNT(*) FROM tenaga_kerjas") ?: 0;
 $unitCount = db_val("SELECT COUNT(*) FROM unit_layanans") ?: 0;
+$adminCount = db_val("SELECT COUNT(*) FROM users") ?: 0;
 
 function nav_active(string $page): string {
     global $currentPage;
@@ -67,6 +68,7 @@ function nav_active(string $page): string {
             <div class="space-y-1">
                 <a href="<?= BASE_URL ?>/pengaturan-admin.php" class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-bold transition-all <?= nav_active('pengaturan-admin.php') ?>">
                     <div class="flex items-center gap-3"><i data-lucide="shield-check" class="w-4 h-4"></i><span>Kelola Admin</span></div>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-black <?= $currentPage === 'pengaturan-admin.php' ? 'bg-accentGold text-gray-900' : 'bg-amber-100 text-amber-800' ?>"><?= h($adminCount) ?></span>
                 </a>
             </div>
         </div>
