@@ -44,10 +44,9 @@ Produk ditujukan untuk menggantikan pengelolaan spreadsheet yang tersebar dengan
 
 | Peran | Kebutuhan | Hak akses saat ini |
 |---|---|---|
-| Super Admin | Mengelola seluruh data dan akun | Kelola tenaga kerja, sertifikasi, unit, perusahaan, dan akun admin |
-| Admin Operasional | Memutakhirkan data operasional harian | Mengelola data operasional sesuai akses aplikasi |
+| Administrator | Mengelola seluruh operasional data | Kelola tenaga kerja, sertifikasi, master unit layanan, master perusahaan mitra, serta impor/ekspor data |
 
-Catatan: pembatasan hak akses per modul masih perlu diperketat sebelum penggunaan produksi multi-peran.
+Sistem dirancang untuk penggunaan single-role (Administrator).
 
 ## 5. Ruang Lingkup MVP
 

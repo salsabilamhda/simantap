@@ -28,7 +28,7 @@ if (!$user || !password_verify($password, $user['password'])) {
 }
 
 if (($user['status'] ?? 'Aktif') !== 'Aktif') {
-    flash_set('error', 'Akun Anda dinonaktifkan. Silakan hubungi Super Admin untuk mengaktifkan kembali.');
+    flash_set('error', 'Akun Anda dinonaktifkan.');
     redirect(BASE_URL . '/login.php');
 }
 

@@ -4,7 +4,6 @@
 // Lalu di akhir halaman include layout-footer.php
 $tkCount = db_val("SELECT COUNT(*) FROM tenaga_kerjas") ?: 0;
 $unitCount = db_val("SELECT COUNT(*) FROM unit_layanans") ?: 0;
-$adminCount = db_val("SELECT COUNT(*) FROM users") ?: 0;
 
 function nav_active(string $page): string {
     global $currentPage;
@@ -62,16 +61,6 @@ function nav_active(string $page): string {
                 </a>
             </div>
         </div>
-
-        <div>
-            <div class="px-3 text-[11px] font-extrabold text-gray-400 uppercase tracking-wider mb-2">Sistem &amp; Akses</div>
-            <div class="space-y-1">
-                <a href="<?= BASE_URL ?>/pengaturan-admin.php" class="flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-sm font-bold transition-all <?= nav_active('pengaturan-admin.php') ?>">
-                    <div class="flex items-center gap-3"><i data-lucide="shield-check" class="w-4 h-4"></i><span>Kelola Admin</span></div>
-                    <span class="px-2 py-0.5 rounded-full text-xs font-black <?= $currentPage === 'pengaturan-admin.php' ? 'bg-accentGold text-gray-900' : 'bg-amber-100 text-amber-800' ?>"><?= h($adminCount) ?></span>
-                </a>
-            </div>
-        </div>
     </nav>
 
     <!-- Footer Profile & Logout -->
@@ -80,7 +69,7 @@ function nav_active(string $page): string {
         'name'     => 'Administrator',
         'username' => '123456',
         'email'    => 'admin@simantap.id',
-        'role'     => 'superadmin',
+        'role'     => 'admin',
     ];
     $authName = $authUser['name'] ?? 'Admin';
     $authInitials = '';
@@ -88,7 +77,7 @@ function nav_active(string $page): string {
     if (!empty($parts[0])) $authInitials .= strtoupper(substr($parts[0], 0, 1));
     if (count($parts) > 1 && !empty($parts[1])) $authInitials .= strtoupper(substr($parts[1], 0, 1));
     if (empty($authInitials)) $authInitials = 'AD';
-    $authRole = ($authUser['role'] ?? '') === 'superadmin' ? 'Super Admin' : 'Admin Operasional';
+    $authRole = 'Administrator';
     $authIdentifier = !empty($authUser['username']) ? $authUser['username'] : $authUser['email'];
     ?>
     <div class="p-4 border-t border-gray-100 bg-gray-50/70">

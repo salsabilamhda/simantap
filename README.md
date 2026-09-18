@@ -57,9 +57,8 @@ Aplikasi ini tidak menggunakan framework modern seperti Next.js atau Firebase; s
 - proses import tidak membutuhkan Composer, PhpSpreadsheet, atau folder `vendor`
 
 ### 6. Akses admin
-- pengelolaan pengguna admin melalui panel admin
-- sistem login berbasis session dan password hash
-- akses dipisahkan sesuai kebutuhan aplikasi
+- sistem autentikasi login administrator berbasis session dan password hash
+- proteksi akses dashboard dan seluruh data operasional
 
 ---
 
@@ -89,7 +88,6 @@ simantap/
 ├─ tenaga-kerja.php         # halaman data tenaga kerja (termasuk modal import Excel & tombol ekspor)
 ├─ master-data-unit.php     # master unit layanan
 ├─ master-data-perusahaan.php # master perusahaan mitra
-├─ pengaturan-admin.php     # pengaturan admin
 ├─ export.php               # endpoint unduh data tenaga kerja (CSV/Excel)
 ├─ README.md                # dokumentasi proyek
 └─ .
