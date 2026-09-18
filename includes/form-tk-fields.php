@@ -12,8 +12,20 @@
             <input type="text" name="nama" required class="w-full px-3.5 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs font-medium focus:outline-none focus:border-primary">
         </div>
         <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">NIK (16 Digit)</label>
-            <input type="text" name="nik" maxlength="16" class="w-full px-3.5 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs font-medium focus:outline-none focus:border-primary">
+            <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-gray-700">NIK (16 Digit) <span class="text-rose-500">*</span></label>
+                <span class="nik-feedback-badge text-[10px] font-bold hidden"></span>
+            </div>
+            <div class="relative">
+                <input type="text" name="nik" required maxlength="16" pattern="[0-9]{16}" placeholder="16 digit NIK KTP" class="nik-input w-full px-3.5 py-2.5 rounded-2xl bg-gray-50 border border-gray-200 text-xs font-medium focus:outline-none focus:border-primary transition-all">
+                <div class="nik-spinner hidden absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <svg class="animate-spin h-4 w-4 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="nik-feedback-text text-[11px] font-bold mt-1.5 hidden"></div>
         </div>
         <div>
             <label class="block text-xs font-bold text-gray-700 mb-1">Tempat Lahir</label>

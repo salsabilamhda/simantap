@@ -233,7 +233,7 @@ function paginationUrl(int $p): string {
             </div>
             <button onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-white text-gray-400 hover:text-gray-600 flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
-        <form method="POST" action="<?= BASE_URL ?>/actions/tk-store.php" class="flex-1 overflow-y-auto p-6 space-y-6">
+        <form id="add-form" method="POST" action="<?= BASE_URL ?>/actions/tk-store.php" class="flex-1 overflow-y-auto p-6 space-y-6">
             <?= csrf_field() ?>
             <?php include __DIR__ . '/includes/form-tk-fields.php'; ?>
             <div class="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
@@ -458,12 +458,22 @@ function paginationUrl(int $p): string {
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // --- Modal helpers ---
-function openAddModal() { document.getElementById('add-modal').classList.remove('hidden'); }
+function openAddModal() {
+    const modal = document.getElementById('add-modal');
+    const f = document.getElementById('add-form');
+    if (f) {
+        f.reset();
+        resetNikFeedback(f);
+    }
+    modal.classList.remove('hidden');
+    lucide.createIcons();
+}
 function closeAddModal() { document.getElementById('add-modal').classList.add('hidden'); }
 function openEditModal(w) {
     document.getElementById('edit-id').value = w.id;
     document.getElementById('edit-subtitle').innerText = 'ID: ' + w.id + ' — ' + w.nama;
     const f = document.getElementById('edit-form');
+    if (f) resetNikFeedback(f);
     const fields = ['nama','nik','nomor_perjanjian','nama_perusahaan','tempat_lahir','tanggal_lahir',
         'no_telepon','email','jenis_kelamin','alamat_domisili',
         'kota_kabupaten','provinsi','jabatan_terakhir','fungsi_pekerjaan','unit','unit_layanan_id',
@@ -474,6 +484,7 @@ function openEditModal(w) {
         if (el && w[name] != null) el.value = w[name];
     });
     document.getElementById('edit-modal').classList.remove('hidden');
+    lucide.createIcons();
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
 function closeCertModal() { document.getElementById('cert-modal').classList.add('hidden'); }
@@ -851,7 +862,23 @@ function renderImportPreview(rows) {
     document.querySelector('#preview-table thead').innerHTML = `<tr>${visibleHeaders.map((header) => `<th class="px-3 py-2 whitespace-nowrap">${header}</th>`).join('')}</tr>`;
     document.querySelector('#preview-table tbody').innerHTML = rows.slice(0, 20).map((row) => `<tr>${visibleHeaders.map((header) => `<td class="px-3 py-1.5 whitespace-nowrap">${String(row[header] ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]))}</td>`).join('')}</tr>`).join('');
     document.getElementById('preview-wrap').classList.toggle('hidden', rows.length === 0);
-    document.getElementById('preview-count').textContent = `${rows.length} baris`;
+    
+    // Periksa apakah ada NIK yang duplikat dalam file Excel
+    const nikCounts = {};
+    let fileDupCount = 0;
+    rows.forEach(r => {
+        const n = String(r['NIK'] ?? '').replace(/\s+/g, '');
+        if (n) {
+            nikCounts[n] = (nikCounts[n] || 0) + 1;
+            if (nikCounts[n] === 2) fileDupCount++;
+        }
+    });
+
+    let previewBadgeText = `${rows.length} baris`;
+    if (fileDupCount > 0) {
+        previewBadgeText += ` (${fileDupCount} NIK berulang di file)`;
+    }
+    document.getElementById('preview-count').textContent = previewBadgeText;
     document.getElementById('process-import').disabled = rows.length === 0;
 }
 
@@ -895,7 +922,7 @@ document.getElementById('excel-file').addEventListener('change', (event) => {
             const missingHeaders = importHeaders.filter((header) => !optionalImportHeaders.has(header) && !Object.keys(normalizedRows[0] || {}).includes(header));
             if (missingHeaders.length) throw new Error(`Kolom wajib belum ada: ${missingHeaders.join(', ')}`);
             renderImportPreview(normalizedRows);
-            importMessage(`${normalizedRows.length} baris siap diproses. Periksa preview terlebih dahulu sebelum menyimpan.`, true);
+            importMessage(`${normalizedRows.length} baris siap diproses. Baris dengan NIK yang sudah ada di database akan dilewati secara otomatis.`, true);
         } catch (error) {
             renderImportPreview([]);
             importMessage(error.message || 'File Excel tidak dapat dibaca.', false);
@@ -922,7 +949,7 @@ document.getElementById('process-import').addEventListener('click', async () => 
             document.getElementById('file-chosen-name').classList.add('hidden');
             setTimeout(() => {
                 window.location.href = '<?= BASE_URL ?>/tenaga-kerja.php';
-            }, 1200);
+            }, 1500);
         }
     } catch (error) {
         importMessage('Server tidak dapat dihubungi.', false);
@@ -931,6 +958,164 @@ document.getElementById('process-import').addEventListener('click', async () => 
         button.querySelector('span').textContent = 'Proses Simpan ke Database';
     }
 });
+
+// ============================================================
+// Real-time NIK Duplicate Check & Validation for Add / Edit Form
+// ============================================================
+function resetNikFeedback(form) {
+    if (!form) return;
+    delete form.dataset.nikDuplicate;
+    const nikInput = form.querySelector('.nik-input');
+    const badge = form.querySelector('.nik-feedback-badge');
+    const text = form.querySelector('.nik-feedback-text');
+    const spinner = form.querySelector('.nik-spinner');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    if (nikInput) {
+        nikInput.classList.remove('border-rose-500', 'bg-rose-50/50', 'border-emerald-500', 'bg-emerald-50/30', 'text-rose-900', 'text-emerald-900');
+        nikInput.classList.add('border-gray-200', 'bg-gray-50');
+    }
+    if (badge) {
+        badge.className = 'nik-feedback-badge text-[10px] font-bold hidden';
+        badge.textContent = '';
+    }
+    if (text) {
+        text.className = 'nik-feedback-text text-[11px] font-bold mt-1.5 hidden';
+        text.innerHTML = '';
+    }
+    if (spinner) spinner.classList.add('hidden');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+function initNikValidation(formId, getExcludeId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    const nikInput = form.querySelector('.nik-input');
+    const badge = form.querySelector('.nik-feedback-badge');
+    const text = form.querySelector('.nik-feedback-text');
+    const spinner = form.querySelector('.nik-spinner');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (!nikInput) return;
+
+    let debounceTimer = null;
+    let abortController = null;
+
+    const doCheck = async () => {
+        const rawVal = nikInput.value.trim();
+        const nik = rawVal.replace(/\D/g, '').slice(0, 16);
+        if (nikInput.value !== nik) nikInput.value = nik;
+
+        if (!nik) {
+            resetNikFeedback(form);
+            return;
+        }
+
+        if (nik.length < 16) {
+            delete form.dataset.nikDuplicate;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            nikInput.classList.remove('border-rose-500', 'bg-rose-50/50', 'border-emerald-500', 'bg-emerald-50/30');
+            nikInput.classList.add('border-gray-200', 'bg-gray-50');
+            if (badge) {
+                badge.className = 'nik-feedback-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800';
+                badge.textContent = `${nik.length}/16 digit`;
+                badge.classList.remove('hidden');
+            }
+            if (text) {
+                text.className = 'nik-feedback-text text-[11px] font-medium text-amber-700 mt-1 hidden';
+                text.innerHTML = '';
+            }
+            return;
+        }
+
+        // Tepat 16 digit: verifikasi ke server
+        if (abortController) abortController.abort();
+        abortController = new AbortController();
+        if (spinner) spinner.classList.remove('hidden');
+
+        try {
+            const excludeId = getExcludeId ? getExcludeId() : '0';
+            const res = await fetch(`actions/check-nik.php?nik=${encodeURIComponent(nik)}&exclude_id=${encodeURIComponent(excludeId)}`, {
+                signal: abortController.signal
+            });
+            const data = await res.json();
+            if (spinner) spinner.classList.add('hidden');
+
+            if (data.exists) {
+                form.dataset.nikDuplicate = '1';
+                nikInput.classList.remove('border-gray-200', 'bg-gray-50', 'border-emerald-500', 'bg-emerald-50/30');
+                nikInput.classList.add('border-rose-500', 'bg-rose-50/50', 'text-rose-900');
+
+                if (badge) {
+                    badge.className = 'nik-feedback-badge text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700';
+                    badge.textContent = 'SUDAH TERDAFTAR';
+                    badge.classList.remove('hidden');
+                }
+                if (text) {
+                    text.className = 'nik-feedback-text text-[11px] font-bold text-rose-600 mt-1.5 flex items-start gap-1.5 p-2.5 rounded-xl bg-rose-50 border border-rose-200';
+                    text.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-500 mt-0.5"></i><span>NIK ini sudah terdaftar atas nama <strong>${escHtml(data.nama)}</strong>. Data orang yang sama tidak dapat ditambahkan lagi.</span>`;
+                    text.classList.remove('hidden');
+                    lucide.createIcons();
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            } else {
+                delete form.dataset.nikDuplicate;
+                nikInput.classList.remove('border-gray-200', 'bg-gray-50', 'border-rose-500', 'bg-rose-50/50', 'text-rose-900');
+                nikInput.classList.add('border-emerald-500', 'bg-emerald-50/30', 'text-emerald-900');
+
+                if (badge) {
+                    badge.className = 'nik-feedback-badge text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+                    badge.textContent = 'NIK TERSEDIA';
+                    badge.classList.remove('hidden');
+                }
+                if (text) {
+                    text.className = 'nik-feedback-text text-[11px] font-bold text-emerald-700 mt-1.5 flex items-center gap-1.5 p-2 rounded-xl bg-emerald-50 border border-emerald-200';
+                    text.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0 text-emerald-600"></i><span>NIK valid dan belum terdaftar dalam sistem.</span>`;
+                    text.classList.remove('hidden');
+                    lucide.createIcons();
+                }
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                if (spinner) spinner.classList.add('hidden');
+            }
+        }
+    };
+
+    nikInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(doCheck, 300);
+    });
+
+    nikInput.addEventListener('blur', () => {
+        clearTimeout(debounceTimer);
+        doCheck();
+    });
+
+    form.addEventListener('submit', (e) => {
+        if (form.dataset.nikDuplicate === '1') {
+            e.preventDefault();
+            alert('Tidak dapat menyimpan: NIK sudah terdaftar atas tenaga kerja lain dalam sistem.');
+            nikInput.focus();
+        }
+    });
+}
+
+// Inisialisasi pengecekan NIK
+initNikValidation('add-form', () => '0');
+initNikValidation('edit-form', () => document.getElementById('edit-id')?.value || '0');
 
 // Auto-open modal tambah jika ada parameter ?tambah=1
 const urlParams = new URLSearchParams(window.location.search);

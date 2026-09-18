@@ -78,43 +78,74 @@ function import_unit_id(?string $value, int $rowNumber): ?int
 }
 
 try {
+    // Ambil seluruh NIK yang sudah ada di database untuk lookup cepat (O(1))
+    $existingDbRows = db_query('SELECT nik FROM tenaga_kerjas WHERE nik IS NOT NULL AND nik != ""');
+    $existingDbMap = array_fill_keys(array_column($existingDbRows, 'nik'), true);
+
+    $seenNiksInBatch = [];
     $records = [];
+    $duplicateInFile = 0;
+    $duplicateInDb = 0;
+
     foreach ($rows as $index => $row) {
         if (!is_array($row)) throw new RuntimeException('Format baris Excel tidak valid.');
         $rowNumber = $index + 2;
+
+        $nik = preg_replace('/\s+/', '', import_required($row, 'NIK', $rowNumber));
+
+        // Cek apakah duplikat di dalam file Excel itu sendiri
+        if (isset($seenNiksInBatch[$nik])) {
+            $duplicateInFile++;
+            continue;
+        }
+
+        // Cek apakah sudah terdaftar di database
+        if (isset($existingDbMap[$nik])) {
+            $duplicateInDb++;
+            continue;
+        }
+
+        $seenNiksInBatch[$nik] = true;
+
         $records[] = [
             'worker' => [
-            import_required($row, 'NO', $rowNumber),
-            import_required($row, 'NOMOR PERJANJIAN', $rowNumber),
-            import_required($row, 'NAMA PERUSAHAAN', $rowNumber),
-            import_required($row, 'NAMA', $rowNumber),
-            import_required($row, 'NIK', $rowNumber),
-            import_required($row, 'TEMPAT LAHIR', $rowNumber),
-            import_date(import_required($row, 'TANGGAL TAHUN LAHIR', $rowNumber), 'TANGGAL TAHUN LAHIR', $rowNumber),
-            import_value($row, 'NO TELEPON (WA)'),
-            import_required($row, 'EMAIL', $rowNumber),
-            import_required($row, 'JENIS KELAMIN', $rowNumber),
-            import_required($row, 'ALAMAT DOMISILI', $rowNumber),
-            import_required($row, 'KOTA/KABUPATEN', $rowNumber),
-            import_required($row, 'PROVINSI', $rowNumber),
-            import_required($row, 'JABATAN TERAKHIR', $rowNumber),
-            import_value($row, 'FUNGSI PEKERJAAN'),
-            import_required($row, 'UNIT', $rowNumber),
-            import_unit_id(import_value($row, 'UNIT LAYANAN'), $rowNumber),
-            import_value($row, 'NOMOR BPJS KESEHATAN'),
-            import_value($row, 'NOMOR BPJS KETENAGAKERJAAN'),
-            import_required($row, 'NOMOR DPLK', $rowNumber),
-            import_required($row, 'BANK DPLK', $rowNumber),
-            import_required($row, 'NOMOR PERJANJIAN KERJA PKWT/PKWTT', $rowNumber),
-            import_date(import_required($row, 'TANGGAL MASUK KERJA', $rowNumber), 'TANGGAL MASUK KERJA', $rowNumber),
-            import_required($row, 'STATUS TENAGA KERJA (PKWT/PKWTT)', $rowNumber),
-            import_required($row, 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)', $rowNumber),
+                import_required($row, 'NO', $rowNumber),
+                import_required($row, 'NOMOR PERJANJIAN', $rowNumber),
+                import_required($row, 'NAMA PERUSAHAAN', $rowNumber),
+                import_required($row, 'NAMA', $rowNumber),
+                $nik,
+                import_required($row, 'TEMPAT LAHIR', $rowNumber),
+                import_date(import_required($row, 'TANGGAL TAHUN LAHIR', $rowNumber), 'TANGGAL TAHUN LAHIR', $rowNumber),
+                import_value($row, 'NO TELEPON (WA)'),
+                import_required($row, 'EMAIL', $rowNumber),
+                import_required($row, 'JENIS KELAMIN', $rowNumber),
+                import_required($row, 'ALAMAT DOMISILI', $rowNumber),
+                import_required($row, 'KOTA/KABUPATEN', $rowNumber),
+                import_required($row, 'PROVINSI', $rowNumber),
+                import_required($row, 'JABATAN TERAKHIR', $rowNumber),
+                import_value($row, 'FUNGSI PEKERJAAN'),
+                import_required($row, 'UNIT', $rowNumber),
+                import_unit_id(import_value($row, 'UNIT LAYANAN'), $rowNumber),
+                import_value($row, 'NOMOR BPJS KESEHATAN'),
+                import_value($row, 'NOMOR BPJS KETENAGAKERJAAN'),
+                import_required($row, 'NOMOR DPLK', $rowNumber),
+                import_required($row, 'BANK DPLK', $rowNumber),
+                import_required($row, 'NOMOR PERJANJIAN KERJA PKWT/PKWTT', $rowNumber),
+                import_date(import_required($row, 'TANGGAL MASUK KERJA', $rowNumber), 'TANGGAL MASUK KERJA', $rowNumber),
+                import_required($row, 'STATUS TENAGA KERJA (PKWT/PKWTT)', $rowNumber),
+                import_required($row, 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)', $rowNumber),
             ],
             'certificate' => [
                 import_value($row, 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)'),
                 import_value($row, 'JUDUL SERTIFIKASI'),
             ],
         ];
+    }
+
+    $totalDuplicate = $duplicateInFile + $duplicateInDb;
+
+    if (empty($records)) {
+        import_json_error("Semua data dalam file Excel ($totalDuplicate data) sudah terdaftar dalam sistem berdasarkan NIK. Tidak ada data baru yang ditambahkan.");
     }
 
     $columns = ['no_urut', 'nomor_perjanjian', 'nama_perusahaan', 'nama', 'nik', 'tempat_lahir', 'tanggal_lahir', 'no_telepon', 'email', 'jenis_kelamin', 'alamat_domisili', 'kota_kabupaten', 'provinsi', 'jabatan_terakhir', 'fungsi_pekerjaan', 'unit', 'unit_layanan_id', 'nomor_bpjs_kesehatan', 'nomor_bpjs_ketenagakerjaan', 'nomor_dplk', 'bank_dplk', 'no_perjanjian_kerja', 'tanggal_masuk_kerja', 'status_tenaga_kerja', 'skema_tenaga_kerja'];
@@ -129,7 +160,21 @@ try {
         }
     }
     db()->commit();
-    echo json_encode(['success' => true, 'message' => count($records) . ' data tenaga kerja berhasil diimport.'], JSON_UNESCAPED_UNICODE);
+
+    $successMsg = count($records) . ' data tenaga kerja baru berhasil diimport.';
+    if ($totalDuplicate > 0) {
+        $detailSkip = [];
+        if ($duplicateInDb > 0) $detailSkip[] = "$duplicateInDb sudah ada di database";
+        if ($duplicateInFile > 0) $detailSkip[] = "$duplicateInFile duplikat dalam file";
+        $successMsg .= ' (' . implode(', ', $detailSkip) . ' dilewati).';
+    }
+
+    echo json_encode([
+        'success'   => true,
+        'message'   => $successMsg,
+        'inserted'  => count($records),
+        'duplicates'=> $totalDuplicate
+    ], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $exception) {
     if (db()->inTransaction()) db()->rollBack();
     import_json_error('Import dibatalkan: ' . $exception->getMessage());

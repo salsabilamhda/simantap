@@ -16,6 +16,15 @@ if (!$existing) {
     redirect(BASE_URL . '/tenaga-kerja.php');
 }
 
+$nik = preg_replace('/\s+/', '', post('nik'));
+if ($nik !== '') {
+    $duplicate = db_row("SELECT id, nama FROM tenaga_kerjas WHERE nik = ? AND id != ? LIMIT 1", [$nik, $id]);
+    if ($duplicate) {
+        flash_set('error', 'Gagal memperbarui: NIK ' . h($nik) . ' sudah digunakan oleh tenaga kerja lain ("' . h($duplicate['nama']) . '"). Perubahan tidak dapat disimpan.');
+        redirect(BASE_URL . '/tenaga-kerja.php');
+    }
+}
+
 $fields = [
     'nama', 'nik', 'nomor_perjanjian', 'nama_perusahaan', 'tempat_lahir',
     'tanggal_lahir', 'no_telepon', 'email',
@@ -43,7 +52,16 @@ foreach ($fields as $f) {
 
 $params[] = $id;
 $sql = "UPDATE tenaga_kerjas SET " . implode(', ', $setClauses) . " WHERE id = ?";
-db_exec($sql, $params);
+try {
+    db_exec($sql, $params);
+} catch (PDOException $e) {
+    if ($e->getCode() == 23000 || str_contains($e->getMessage(), 'Duplicate entry')) {
+        flash_set('error', 'Gagal memperbarui: NIK tersebut sudah digunakan oleh data tenaga kerja lain.');
+    } else {
+        flash_set('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+    }
+    redirect(BASE_URL . '/tenaga-kerja.php');
+}
 
 flash_set('success', "Data $nama berhasil diperbarui!");
 redirect(BASE_URL . '/tenaga-kerja.php');

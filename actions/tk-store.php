@@ -3,12 +3,22 @@ require_once dirname(__DIR__) . '/db.php';
 csrf_verify();
 
 $nama   = post('nama');
+$nik    = preg_replace('/\s+/', '', post('nik'));
 $status = post('status_tenaga_kerja', 'PKWTT');
 $jk     = post('jenis_kelamin', 'LAKI');
 
 if (empty($nama)) {
     flash_set('error', 'Nama tenaga kerja tidak boleh kosong.');
     redirect(BASE_URL . '/tenaga-kerja.php');
+}
+
+// Cek apakah NIK sudah terdaftar
+if ($nik !== '') {
+    $existing = db_row("SELECT id, nama FROM tenaga_kerjas WHERE nik = ? LIMIT 1", [$nik]);
+    if ($existing) {
+        flash_set('error', 'Gagal menambahkan: Tenaga kerja dengan NIK ' . h($nik) . ' sudah terdaftar atas nama "' . h($existing['nama']) . '". Data tidak dapat ditambahkan lagi.');
+        redirect(BASE_URL . '/tenaga-kerja.php');
+    }
 }
 
 $fields = [
@@ -18,7 +28,6 @@ $fields = [
     'jabatan_terakhir', 'fungsi_pekerjaan', 'unit', 'unit_layanan_id',
     'nomor_bpjs_kesehatan', 'nomor_bpjs_ketenagakerjaan', 'nomor_dplk', 'bank_dplk',
     'no_perjanjian_kerja', 'tanggal_masuk_kerja', 'status_tenaga_kerja', 'skema_tenaga_kerja',
-    'nomor_perjanjian',
 ];
 
 $cols   = [];
@@ -47,7 +56,16 @@ if (empty($cols)) {
 }
 
 $sql = "INSERT INTO tenaga_kerjas (" . implode(', ', $cols) . ") VALUES (" . implode(', ', $vals) . ")";
-db_exec($sql, $params);
+try {
+    db_exec($sql, $params);
+} catch (PDOException $e) {
+    if ($e->getCode() == 23000 || str_contains($e->getMessage(), 'Duplicate entry')) {
+        flash_set('error', 'Gagal menambahkan: NIK sudah terdaftar di database.');
+    } else {
+        flash_set('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+    }
+    redirect(BASE_URL . '/tenaga-kerja.php');
+}
 
 flash_set('success', "Tenaga kerja $nama berhasil ditambahkan!");
 redirect(BASE_URL . '/tenaga-kerja.php');

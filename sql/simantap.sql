@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `tenaga_kerjas` (
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_tenaga_kerjas_nama` (`nama`),
-  KEY `idx_tenaga_kerjas_nik` (`nik`),
+  UNIQUE KEY `uq_tenaga_kerjas_nik` (`nik`),
   KEY `idx_tenaga_kerjas_unit_layanan` (`unit_layanan_id`),
   KEY `idx_tenaga_kerjas_status` (`status_tenaga_kerja`),
   CONSTRAINT `fk_tenaga_kerjas_unit_layanan`
