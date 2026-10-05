@@ -5,11 +5,13 @@
 $tkCount = db_val("SELECT COUNT(*) FROM tenaga_kerjas") ?: 0;
 $unitCount = db_val("SELECT COUNT(*) FROM unit_layanans") ?: 0;
 
-function nav_active(string $page): string {
-    global $currentPage;
-    return $currentPage === $page
-        ? 'bg-primaryDark text-white shadow-teal-glow'
-        : 'text-gray-600 hover:bg-teal-50 hover:text-primaryDark';
+if (!function_exists('nav_active')) {
+    function nav_active($page) {
+        global $currentPage;
+        return $currentPage === $page
+            ? 'bg-primaryDark text-white shadow-teal-glow'
+            : 'text-gray-600 hover:bg-teal-50 hover:text-primaryDark';
+    }
 }
 ?>
 
@@ -65,20 +67,23 @@ function nav_active(string $page): string {
 
     <!-- Footer Profile & Logout -->
     <?php
-    $authUser = auth_user() ?? [
-        'name'     => 'Administrator',
-        'username' => '123456',
-        'email'    => 'admin@simantap.id',
-        'role'     => 'admin',
-    ];
-    $authName = $authUser['name'] ?? 'Admin';
+    $authUser = auth_user();
+    if (!$authUser) {
+        $authUser = array(
+            'name'     => 'Administrator',
+            'username' => '123456',
+            'email'    => 'admin@simantap.id',
+            'role'     => 'admin',
+        );
+    }
+    $authName = isset($authUser['name']) ? $authUser['name'] : 'Admin';
     $authInitials = '';
     $parts = preg_split('/\s+/', trim($authName));
     if (!empty($parts[0])) $authInitials .= strtoupper(substr($parts[0], 0, 1));
     if (count($parts) > 1 && !empty($parts[1])) $authInitials .= strtoupper(substr($parts[1], 0, 1));
     if (empty($authInitials)) $authInitials = 'AD';
     $authRole = 'Administrator';
-    $authIdentifier = !empty($authUser['username']) ? $authUser['username'] : $authUser['email'];
+    $authIdentifier = !empty($authUser['username']) ? $authUser['username'] : (isset($authUser['email']) ? $authUser['email'] : '');
     ?>
     <div class="p-4 border-t border-gray-100 bg-gray-50/70">
         <div class="flex items-center justify-between gap-2.5">

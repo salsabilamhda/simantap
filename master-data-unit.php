@@ -24,8 +24,8 @@ include __DIR__ . '/includes/layout-sidebar.php';
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <?php foreach ($units as $u):
-            $color = $u['color_hex'] ?? '#2BA8A2';
-            $kode  = $u['kode'] ?? '???';
+            $color = isset($u['color_hex']) ? $u['color_hex'] : '#2BA8A2';
+            $kode  = isset($u['kode']) ? $u['kode'] : '???';
         ?>
         <div class="bg-white rounded-3xl p-6 border border-teal-100 shadow-card-custom relative overflow-hidden">
             <div class="flex items-center justify-between mb-4">
@@ -38,7 +38,7 @@ include __DIR__ . '/includes/layout-sidebar.php';
             </div>
             <div class="font-black text-gray-900 text-base"><?= h($u['nama']) ?></div>
             <div class="text-xs text-gray-400 font-bold mt-0.5">Kode: <?= h($kode) ?></div>
-            <div class="text-xs text-gray-500 mt-2 font-medium">Unit Induk: <?= h($u['unit_induk'] ?? '-') ?></div>
+            <div class="text-xs text-gray-500 mt-2 font-medium">Unit Induk: <?= h(isset($u['unit_induk']) ? $u['unit_induk'] : '-') ?></div>
                 <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
                     <button type="button" onclick='openEditUnitModal(<?= json_encode($u, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' class="flex-1 py-2 rounded-xl bg-amber-50 text-amber-700 hover:bg-amber-100 text-xs font-black">Edit</button>
                     <form method="POST" action="<?= BASE_URL ?>/actions/unit-delete.php" class="flex-1" onsubmit="return confirm('Hapus unit ini? Data tenaga kerja akan tetap ada, tetapi unitnya dikosongkan.')">

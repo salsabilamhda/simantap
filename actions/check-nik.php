@@ -7,8 +7,10 @@ if (!headers_sent()) {
     header('Content-Type: application/json; charset=utf-8');
 }
 
-$nik = preg_replace('/\s+/', '', (string)($_GET['nik'] ?? $_POST['nik'] ?? ''));
-$excludeId = (int)($_GET['exclude_id'] ?? $_POST['exclude_id'] ?? 0);
+$rawNik = isset($_GET['nik']) ? $_GET['nik'] : (isset($_POST['nik']) ? $_POST['nik'] : '');
+$rawExclude = isset($_GET['exclude_id']) ? $_GET['exclude_id'] : (isset($_POST['exclude_id']) ? $_POST['exclude_id'] : 0);
+$nik = preg_replace('/\s+/', '', (string)$rawNik);
+$excludeId = (int)$rawExclude;
 
 if ($nik === '') {
     echo json_encode(['exists' => false, 'message' => 'NIK kosong']);

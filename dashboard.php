@@ -130,7 +130,7 @@ include __DIR__ . '/includes/layout-sidebar.php';
             <div class="space-y-4">
                 <?php foreach ($units as $unit):
                     $pct = $totalTenagaKerja > 0 ? round(($unit['jumlah'] / $totalTenagaKerja) * 100) : 0;
-                    $color = $unit['color_hex'] ?? '#2BA8A2';
+                    $color = isset($unit['color_hex']) ? $unit['color_hex'] : '#2BA8A2';
                 ?>
                 <div>
                     <div class="flex items-center justify-between text-xs font-bold mb-1.5">

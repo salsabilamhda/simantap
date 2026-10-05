@@ -8,7 +8,7 @@ session_start_safe();
 auth_require();
 $currentUser = auth_user();
 $flash = flash_get();
-$pageTitle = $pageTitle ?? 'SIMANTAP';
+$pageTitle = isset($pageTitle) ? $pageTitle : 'SIMANTAP';
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>

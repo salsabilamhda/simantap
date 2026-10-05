@@ -38,7 +38,7 @@ $setClauses = [];
 $params     = [];
 
 foreach ($fields as $f) {
-    $val = $_POST[$f] ?? null;
+    $val = isset($_POST[$f]) ? $_POST[$f] : null;
     $setClauses[] = "`$f` = ?";
     // Store empty string as NULL for date fields
     if (in_array($f, ['tanggal_lahir', 'tanggal_masuk_kerja']) && $val === '') {

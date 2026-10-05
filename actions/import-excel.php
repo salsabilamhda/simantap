@@ -4,10 +4,10 @@ require_once dirname(__DIR__) . '/db.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start_safe();
 
-function import_json_error(string $message, int $status = 400): never
+function import_json_error($message, $status = 400)
 {
     http_response_code($status);
-    echo json_encode(['success' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
+    echo json_encode(array('success' => false, 'message' => $message), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -15,13 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     import_json_error('Metode request tidak diizinkan.', 405);
 }
 
-$csrfToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-if (!hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
+$csrfToken = isset($_SERVER['HTTP_X_CSRF_TOKEN']) ? $_SERVER['HTTP_X_CSRF_TOKEN'] : '';
+$sessionToken = isset($_SESSION['csrf_token']) ? $_SESSION['csrf_token'] : '';
+if (!hash_equals($sessionToken, $csrfToken)) {
     import_json_error('Token keamanan tidak valid.', 403);
 }
 
 $payload = json_decode(file_get_contents('php://input'), true);
-$rows = $payload['rows'] ?? null;
+$rows = isset($payload['rows']) ? $payload['rows'] : null;
 if (!is_array($rows) || !$rows) {
     import_json_error('Tidak ada data untuk diimport.');
 }
@@ -29,13 +30,14 @@ if (count($rows) > 5000) {
     import_json_error('Maksimal 5.000 baris per import.');
 }
 
-function import_value(array $row, string $key): ?string
+function import_value($row, $key)
 {
-    $value = trim((string) ($row[$key] ?? ''));
+    $val = isset($row[$key]) ? $row[$key] : '';
+    $value = trim((string) $val);
     return $value === '' ? null : ltrim($value, "'");
 }
 
-function import_required(array $row, string $key, int $rowNumber): string
+function import_required($row, $key, $rowNumber)
 {
     $value = import_value($row, $key);
     if ($value === null) {
@@ -44,33 +46,34 @@ function import_required(array $row, string $key, int $rowNumber): string
     return $value;
 }
 
-function import_date(?string $value, string $label, int $rowNumber): ?string
+function import_date($value, $label, $rowNumber)
 {
     if ($value === null) return null;
     $value = preg_replace('/\x{00A0}/u', ' ', trim($value));
     $value = preg_replace('/\s+/', ' ', $value);
     if (is_numeric($value) && (float) $value > 0) {
-        $date = (new DateTimeImmutable('1899-12-30'))->modify('+' . (int) floor((float) $value) . ' days');
+        $date = (new DateTime('1899-12-30'))->modify('+' . (int) floor((float) $value) . ' days');
         return $date->format('Y-m-d');
     }
-    foreach (['Y-m-d', 'Y/m/d', 'd/m/Y', 'd-m-Y', 'd.m.Y', 'm/d/Y', 'm-d-Y', 'm.d.Y', 'j/n/Y', 'n/j/Y', 'Y-m-d H:i', 'Y-m-d H:i:s', 'd/m/Y H:i', 'd/m/Y H:i:s', 'd-m-Y H:i', 'd-m-Y H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d\TH:i:s.v\Z'] as $format) {
+    $formats = array('Y-m-d', 'Y/m/d', 'd/m/Y', 'd-m-Y', 'd.m.Y', 'm/d/Y', 'm-d-Y', 'm.d.Y', 'j/n/Y', 'n/j/Y', 'Y-m-d H:i', 'Y-m-d H:i:s', 'd/m/Y H:i', 'd/m/Y H:i:s', 'd-m-Y H:i', 'd-m-Y H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d\TH:i:s.v\Z');
+    foreach ($formats as $format) {
         $date = DateTime::createFromFormat('!' . $format, $value);
         if ($date && $date->format($format) === $value) return $date->format('Y-m-d');
     }
     try {
-        return (new DateTimeImmutable($value))->format('Y-m-d');
-    } catch (Throwable) {
+        return (new DateTime($value))->format('Y-m-d');
+    } catch (Exception $e) {
         // Fall through to the standard import error below.
     }
     throw new RuntimeException("$label pada baris $rowNumber tidak valid.");
 }
 
-function import_unit_id(?string $value, int $rowNumber): ?int
+function import_unit_id($value, $rowNumber)
 {
     if ($value === null) {
         throw new RuntimeException("UNIT LAYANAN pada baris $rowNumber wajib diisi.");
     }
-    $row = db_row('SELECT id FROM unit_layanans WHERE UPPER(TRIM(nama)) = UPPER(TRIM(?)) OR UPPER(TRIM(kode)) = UPPER(TRIM(?))', [$value, $value]);
+    $row = db_row('SELECT id FROM unit_layanans WHERE UPPER(TRIM(nama)) = UPPER(TRIM(?)) OR UPPER(TRIM(kode)) = UPPER(TRIM(?))', array($value, $value));
     if (!$row) {
         throw new RuntimeException("UNIT LAYANAN '$value' pada baris $rowNumber tidak ditemukan di master data.");
     }
@@ -82,8 +85,8 @@ try {
     $existingDbRows = db_query('SELECT nik FROM tenaga_kerjas WHERE nik IS NOT NULL AND nik != ""');
     $existingDbMap = array_fill_keys(array_column($existingDbRows, 'nik'), true);
 
-    $seenNiksInBatch = [];
-    $records = [];
+    $seenNiksInBatch = array();
+    $records = array();
     $duplicateInFile = 0;
     $duplicateInDb = 0;
 
@@ -107,8 +110,8 @@ try {
 
         $seenNiksInBatch[$nik] = true;
 
-        $records[] = [
-            'worker' => [
+        $records[] = array(
+            'worker' => array(
                 import_required($row, 'NO', $rowNumber),
                 import_required($row, 'NOMOR PERJANJIAN', $rowNumber),
                 import_required($row, 'NAMA PERUSAHAAN', $rowNumber),
@@ -134,12 +137,12 @@ try {
                 import_date(import_required($row, 'TANGGAL MASUK KERJA', $rowNumber), 'TANGGAL MASUK KERJA', $rowNumber),
                 import_required($row, 'STATUS TENAGA KERJA (PKWT/PKWTT)', $rowNumber),
                 import_required($row, 'SKEMA TENAGA KERJA (PEMBORONGAN / VENDOR BASED)', $rowNumber),
-            ],
-            'certificate' => [
+            ),
+            'certificate' => array(
                 import_value($row, 'NOMOR SERTIFIKAT (SERTIFIKASI WAJIB)'),
                 import_value($row, 'JUDUL SERTIFIKASI'),
-            ],
-        ];
+            ),
+        );
     }
 
     $totalDuplicate = $duplicateInFile + $duplicateInDb;
@@ -148,7 +151,7 @@ try {
         import_json_error("Semua data dalam file Excel ($totalDuplicate data) sudah terdaftar dalam sistem berdasarkan NIK. Tidak ada data baru yang ditambahkan.");
     }
 
-    $columns = ['no_urut', 'nomor_perjanjian', 'nama_perusahaan', 'nama', 'nik', 'tempat_lahir', 'tanggal_lahir', 'no_telepon', 'email', 'jenis_kelamin', 'alamat_domisili', 'kota_kabupaten', 'provinsi', 'jabatan_terakhir', 'fungsi_pekerjaan', 'unit', 'unit_layanan_id', 'nomor_bpjs_kesehatan', 'nomor_bpjs_ketenagakerjaan', 'nomor_dplk', 'bank_dplk', 'no_perjanjian_kerja', 'tanggal_masuk_kerja', 'status_tenaga_kerja', 'skema_tenaga_kerja'];
+    $columns = array('no_urut', 'nomor_perjanjian', 'nama_perusahaan', 'nama', 'nik', 'tempat_lahir', 'tanggal_lahir', 'no_telepon', 'email', 'jenis_kelamin', 'alamat_domisili', 'kota_kabupaten', 'provinsi', 'jabatan_terakhir', 'fungsi_pekerjaan', 'unit', 'unit_layanan_id', 'nomor_bpjs_kesehatan', 'nomor_bpjs_ketenagakerjaan', 'nomor_dplk', 'bank_dplk', 'no_perjanjian_kerja', 'tanggal_masuk_kerja', 'status_tenaga_kerja', 'skema_tenaga_kerja');
     $statement = db()->prepare('INSERT INTO tenaga_kerjas (`' . implode('`, `', $columns) . '`, created_at, updated_at) VALUES (' . implode(', ', array_fill(0, count($columns), '?')) . ', NOW(), NOW())');
     $certificateStatement = db()->prepare('INSERT INTO sertifikasis (tenaga_kerja_id, nomor_sertifikat, judul_sertifikasi, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())');
 
@@ -156,26 +159,26 @@ try {
     foreach ($records as $record) {
         $statement->execute($record['worker']);
         if ($record['certificate'][1] !== null) {
-            $certificateStatement->execute([db()->lastInsertId(), $record['certificate'][0], $record['certificate'][1]]);
+            $certificateStatement->execute(array(db()->lastInsertId(), $record['certificate'][0], $record['certificate'][1]));
         }
     }
     db()->commit();
 
     $successMsg = count($records) . ' data tenaga kerja baru berhasil diimport.';
     if ($totalDuplicate > 0) {
-        $detailSkip = [];
+        $detailSkip = array();
         if ($duplicateInDb > 0) $detailSkip[] = "$duplicateInDb sudah ada di database";
         if ($duplicateInFile > 0) $detailSkip[] = "$duplicateInFile duplikat dalam file";
         $successMsg .= ' (' . implode(', ', $detailSkip) . ' dilewati).';
     }
 
-    echo json_encode([
+    echo json_encode(array(
         'success'   => true,
         'message'   => $successMsg,
         'inserted'  => count($records),
         'duplicates'=> $totalDuplicate
-    ], JSON_UNESCAPED_UNICODE);
-} catch (Throwable $exception) {
+    ), JSON_UNESCAPED_UNICODE);
+} catch (Exception $exception) {
     if (db()->inTransaction()) db()->rollBack();
     import_json_error('Import dibatalkan: ' . $exception->getMessage());
 }

@@ -66,17 +66,21 @@ include __DIR__ . '/includes/layout-head.php';
 include __DIR__ . '/includes/layout-sidebar.php';
 
 // Helper for pagination URL
-function paginationUrl(int $p): string {
-    $params = $_GET;
-    $params['page'] = $p;
-    return '?' . http_build_query($params);
+if (!function_exists('paginationUrl')) {
+    function paginationUrl($p) {
+        $params = $_GET;
+        $params['page'] = $p;
+        return '?' . http_build_query($params);
+    }
 }
 
-$exportParams = array_filter([
+$exportParams = array_filter(array(
     'q'      => $search,
     'unit'   => $unitFilter,
     'status' => $statusFilter,
-], fn($v) => $v !== null && $v !== '' && $v !== 'ALL');
+), function($v) {
+    return $v !== null && $v !== '' && $v !== 'ALL';
+});
 $exportUrl = BASE_URL . '/export.php' . ($exportParams ? '?' . http_build_query($exportParams) : '');
 ?>
 

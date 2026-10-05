@@ -13,8 +13,9 @@ define('DB_CHARSET', 'utf8mb4');
 // Auto-detect BASE_URL agar fleksibel (bisa via php -S localhost:8000 atau Laragon / XAMPP)
 if (!defined('BASE_URL')) {
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+    $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+    $scriptName = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '';
+    $scriptDir = str_replace('\\', '/', dirname($scriptName));
     if (basename($scriptDir) === 'actions') {
         $scriptDir = dirname($scriptDir);
     }
