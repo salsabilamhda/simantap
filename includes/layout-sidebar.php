@@ -19,14 +19,14 @@ function nav_active(string $page): string {
 <!-- Sidebar -->
 <aside id="main-sidebar" class="fixed md:sticky top-0 left-0 h-screen w-72 bg-white border-r border-teal-100 flex flex-col z-50 transition-transform -translate-x-full md:translate-x-0 shrink-0">
     <!-- Logo Header -->
-    <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+    <div class="h-20 px-6 border-b border-teal-100 flex items-center justify-between shrink-0">
         <a href="<?= BASE_URL ?>/dashboard.php" class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primaryDark shadow-teal-glow text-white font-black text-xl flex items-center justify-center">S</div>
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primaryDark shadow-teal-glow text-white font-black text-xl flex items-center justify-center shrink-0">S</div>
             <div>
                 <div class="flex items-center gap-1.5">
-                    <span class="text-xl font-black tracking-tight text-primaryDark">SIMANTAP</span>
+                    <span class="text-xl font-black tracking-tight text-primaryDark leading-tight">SIMANTAP</span>
                 </div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Data Tenaga Kerja</p>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider leading-tight">Data Tenaga Kerja</p>
             </div>
         </a>
         <button onclick="toggleSidebar()" class="md:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded-lg">
@@ -104,7 +104,7 @@ function nav_active(string $page): string {
 <!-- Main Content Area -->
 <div class="flex-1 flex flex-col min-w-0 min-h-screen">
     <!-- Top Navbar -->
-    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-teal-100 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-xs">
+    <header class="sticky top-0 z-30 h-20 bg-white/90 backdrop-blur-md border-b border-teal-100 px-4 sm:px-8 flex items-center justify-between shadow-xs">
         <div class="flex items-center gap-3">
             <button onclick="toggleSidebar()" class="md:hidden p-2 text-gray-600 hover:bg-teal-50 rounded-xl">
                 <i data-lucide="menu" class="w-5 h-5"></i>

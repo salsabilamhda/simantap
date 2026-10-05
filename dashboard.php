@@ -227,9 +227,9 @@ include __DIR__ . '/includes/layout-sidebar.php';
             <div class="pt-3 border-t border-gray-100 space-y-2">
                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Aksi Cepat</div>
                 <div class="grid grid-cols-2 gap-2">
-                    <a href="<?= BASE_URL ?>/export.php" class="p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 border border-gray-200 text-gray-700 hover:text-primaryDark text-xs font-bold flex items-center gap-2 transition-colors">
-                        <i data-lucide="download" class="w-4 h-4 text-teal-600"></i>
-                        <span>Ekspor Data</span>
+                    <a href="<?= BASE_URL ?>/export.php" class="p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 border border-gray-200 text-gray-700 hover:text-primaryDark text-xs font-bold flex items-center gap-2 transition-colors" title="Unduh data format Excel (.xlsx)">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-teal-600"></i>
+                        <span>Ekspor Excel</span>
                     </a>
                     <a href="<?= BASE_URL ?>/master-data-unit.php" class="p-2.5 rounded-xl bg-gray-50 hover:bg-teal-50 border border-gray-200 text-gray-700 hover:text-primaryDark text-xs font-bold flex items-center gap-2 transition-colors">
                         <i data-lucide="map-pin" class="w-4 h-4 text-teal-600"></i>

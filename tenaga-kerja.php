@@ -71,6 +71,13 @@ function paginationUrl(int $p): string {
     $params['page'] = $p;
     return '?' . http_build_query($params);
 }
+
+$exportParams = array_filter([
+    'q'      => $search,
+    'unit'   => $unitFilter,
+    'status' => $statusFilter,
+], fn($v) => $v !== null && $v !== '' && $v !== 'ALL');
+$exportUrl = BASE_URL . '/export.php' . ($exportParams ? '?' . http_build_query($exportParams) : '');
 ?>
 
 <div class="space-y-6 max-w-7xl mx-auto">
@@ -88,8 +95,8 @@ function paginationUrl(int $p): string {
             <button onclick="openImportModal()" class="btn-teal-outline px-4 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer flex-1 sm:flex-initial justify-center bg-white shadow-xs hover:bg-teal-50">
                 <i data-lucide="file-up" class="w-4 h-4 text-teal-600"></i><span>Import Excel</span>
             </button>
-            <a href="<?= BASE_URL ?>/export.php" class="btn-teal-outline px-4 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer flex-1 sm:flex-initial justify-center bg-white shadow-xs hover:bg-teal-50" title="Unduh data tenaga kerja (CSV/Excel)">
-                <i data-lucide="download" class="w-4 h-4 text-teal-600"></i><span>Ekspor Data</span>
+            <a href="<?= $exportUrl ?>" class="btn-teal-outline px-4 py-2.5 text-xs uppercase tracking-wider gap-2 cursor-pointer flex-1 sm:flex-initial justify-center bg-white shadow-xs hover:bg-teal-50" title="Unduh data tenaga kerja format Excel (.xlsx) rapi">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4 text-teal-600"></i><span>Ekspor Excel</span>
             </a>
         </div>
     </div>
